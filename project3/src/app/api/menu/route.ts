@@ -3,7 +3,7 @@ import pool from '@/lib/db';
 
 export async function GET() {
   try {
-    const query = `SELECT item_id, item_name, item_type FROM menu_items`;
+    const query = `SELECT item_id, item_name, item_type, sell_price FROM menu_items`;
     const result = await pool.query(query);
     
     return NextResponse.json(result.rows, { status: 200 });

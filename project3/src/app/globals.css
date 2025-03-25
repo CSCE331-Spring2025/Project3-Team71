@@ -1,26 +1,44 @@
-@import "tailwindcss";
+/* app/globals.css */
+@import 'tailwindcss';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Color Palette */
+  --color-primary: #D7A6B3;    /* Soft pink */
+  --color-accent: #BA274A;     /* Deep raspberry */
+  --color-background: #E5CDC8; /* Pale blush */
+  --color-highlight: #B2ECE1;  /* Mint green */
+  --color-text: #000000;       /* Black */
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+@layer utilities {
+  /* Background Utilities */
+  .bg-primary { background-color: var(--color-primary); }
+  .bg-accent { background-color: var(--color-accent); }
+  .bg-highlight { background-color: var(--color-highlight); }
+
+  /* Text Utilities */
+  .text-primary { color: var(--color-primary); }
+  .text-accent { color: var(--color-accent); }
+  .text-highlight { color: var(--color-highlight); }
+
+  /* Button Styles */
+  .btn-primary {
+    background-color: var(--color-accent);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.3s ease;
+  }
+  .btn-primary:hover {
+    background-color: color-mix(in srgb, var(--color-accent) 90%, black);
+  }
+
+  /* Border Utilities */
+  .border-primary { border-color: var(--color-primary); }
+  .border-accent { border-color: var(--color-accent); }
 }
