@@ -6,15 +6,10 @@ export default function Page() {
     <div>
     <h1>This is home page</h1>
         <p>Welcome to Tea71</p>
-        <p>Choose your role to continue:</p>
         <br />
-        <Link href={`/customer`}>Customer</Link>
-        <br />
-        <br />
-        <Link href={`/cashier`}>Cashier</Link>
-        <br />
-        <br />
-        <Link href={`/manager`}>Manager</Link>
+        <button className="bg-blue-400 my-2 text-white p-1 rounded">
+          <Link href={`/login`}>Login</Link>
+        </button>
     </div>
   )
 }
