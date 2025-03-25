@@ -18,23 +18,22 @@ export default async function Page() {
   console.log(menuItems); // Log the fetched menu items to the console
   return (
     <div>
-    <h1>This is home page</h1>
-        <p>Welcome to Tea71</p>
-        <br />
-        <button className="bg-blue-400 my-2 text-white p-1 rounded">
-          <Link href={`/login`}>Login</Link>
-        </button>
+      <h1>Welcome to Tea71</h1>
+      <br />
+      <button className="bg-blue-400 my-2 text-white p-1 rounded">
+        <Link href={`/login`}>Login</Link>
+      </button>
 
-        <h2 className="mt-4">Menu</h2>
-        {menuItems.length > 0 ? (
-          menuItems.map((category) => (
-            <div key={category.item_type}>
-              <h3 className="font-bold">{category.item_name}</h3>
-            </div>
-          ))
-        ) : (
-          <p>No menu items found.</p>
-        )}
+      <h2 className="mt-4">Menu</h2>
+      {menuItems.length > 0 ? (
+        menuItems.map((category) => (
+          <button key={category.item_id} className="bg-blue-200 my-2 text-black p-1 rounded">
+            <h3 className="font-bold">{category.item_name}</h3>
+          </button>
+        ))
+      ) : (
+        <p>No menu items found.</p>
+      )}
     </div>
   )
 }
