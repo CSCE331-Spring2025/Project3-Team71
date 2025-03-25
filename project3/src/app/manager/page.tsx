@@ -10,7 +10,7 @@ const ManagerPage = async () => {
     if (!session?.user) redirect("/");
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <h1 className="text-3xl my-3"> Employee {session?.user?.name}</h1>
+      <h1 className="text-3xl my-3"> Manager {session?.user?.name}</h1>
       
       <Image
         src={session?.user?.image}
