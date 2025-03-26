@@ -1,12 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import pool from '@/lib/db';
-
-export async function GET(req: NextRequest, { params }: { params: { itemName: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Record<string, string> }) {
   try {
     const itemName = decodeURIComponent(params.itemName);
     const query = `
-      SELECT item_name, array_length(ingredients, 1) AS total_ingredients  
-      FROM Menu_Items 
+      SELECT item_name, array_length(ingredients, 1) AS total_ingredients
+      FROM Menu_Items
       WHERE item_name = $1;
     `;
     const values = [itemName];
