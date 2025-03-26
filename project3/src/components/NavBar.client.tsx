@@ -12,7 +12,8 @@ interface NavBarClientProps {
 }
 
 const NavBarClient = ({ session }: NavBarClientProps) => {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [accountModalOpen, setAccountModalOpen] = useState(false);
+  const [cartModalOpen, setCartModalOpen] = useState(false);
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light mt-4 px-4 py-2 flex items-center justify-between relative">
@@ -23,7 +24,7 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
           </button>
         ) : (
           <div className="relative">
-            <button onClick={() => setModalOpen(!modalOpen)}>
+            <button onClick={() => setAccountModalOpen(!accountModalOpen)}>
               <Image
                 src={session.user?.image} 
                 alt={session.user?.name || 'User'}
@@ -32,12 +33,21 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
                 className='rounded-full'
               />
             </button>
-            {modalOpen && 
-            <div className=" absolute bg-white p-6 rounded-lg w-80 shadow-lg z-10">
-                <h2 className="text-xl font-bold mb-4">Welcome {session.user?.name}</h2>
-                <Logout />
-            </div>
-            }
+            {accountModalOpen && (
+                <div className="absolute top-full mt-2 left-0">
+                    <div className="absolute -top-2 left-2 w-0 h-0 
+                        border-l-8 border-l-transparent 
+                        border-b-8 border-b-white 
+                        border-r-8 border-r-transparent 
+                        z-20"  // Ensure it's above other elements
+                    />
+                    
+                    <div className="relative flex flex-col bg-white p-6 items-center rounded-lg w-80 shadow-lg z-10">
+                        <h2 className="text-xl font-bold mb-4">Welcome {session.user?.name}</h2>
+                        <Logout />
+                    </div>
+                </div>
+            )}
           </div>
         )}
       </div>
@@ -53,8 +63,28 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
         </a>
       </div>
 
-      <div className="absolute right-4">
-        <ShoppingCart size={24} />
+      <div className="absolute right-8">
+        <button onClick={() => setCartModalOpen(!cartModalOpen)}>
+            <ShoppingCart size={24} />
+        </button>
+        
+        {cartModalOpen && (
+            <div className="absolute top-full mt-2 right-0">
+                <div className="absolute -top-2 right-2 w-0 h-0 
+                    border-l-8 border-l-transparent 
+                    border-b-8 border-b-white 
+                    border-r-8 border-r-transparent 
+                    z-20"
+                />
+                
+                <div className="relative flex flex-col bg-white p-6 items-center rounded-lg w-80 shadow-lg z-10">
+                    <h2 className="text-xl font-bold mb-4">Your Cart</h2>
+                    {/* Cart items would go here */}
+                    <p className="text-center">No items in your cart.</p>
+                    <button className="bg-blue-500 text-white p-2 rounded mt-4" onClick={() => setCartModalOpen(false)}>Checkout</button>
+                </div>
+            </div>
+        )}
       </div>
     </nav>
   );
