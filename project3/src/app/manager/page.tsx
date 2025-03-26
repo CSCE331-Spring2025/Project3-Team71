@@ -13,12 +13,12 @@ const ManagerPage = async () => {
       <h1 className="text-3xl my-3"> Manager {session?.user?.name}</h1>
       
       <Image
-        src={session?.user?.image}
-        alt={session?.user?.name}
+        src={session?.user?.image ?? "/default-avatar.png"} // Use a default image if `image` is null or undefined
+        alt={session?.user?.name ?? "User avatar"}
         width={72}
         height={72}
-        className='rounded-full'
       />
+
 
       <Logout />
     </div>

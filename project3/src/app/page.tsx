@@ -3,15 +3,54 @@
 import { useState, useEffect } from 'react';
 import { Loader } from 'lucide-react';
 
+
 export default function MenuPage() {
-  const [menuItems, setMenuItems] = useState([]);
-  const [menuCategories, setMenuCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [menuCategories, setMenuCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState<{
+    item_id: number;
+    item_name: string;
+    sell_price: number;
+    item_type: string;
+    ingredients?: string[];
+  } | null>(null);
   // Default customization: medium ice and no ingredients removed.
-  const [customization, setCustomization] = useState({ ice: "Medium", removedIngredients: [] });
-  const [cart, setCart] = useState([]);
+  const [customization, setCustomization] = useState<{
+    ice: string;
+    removedIngredients: string[];
+  }>({
+    ice: "Medium", 
+    removedIngredients: []
+  });
+  interface CartItem {
+    item_id?: number;
+    item_name?: string;
+    sell_price?: number;
+    item_type?: string;
+    ingredients?: string[];
+    customization: {
+      ice: string;
+      removedIngredients: string[];
+    };
+  }
+  // Update the cart state to use this type
+  const [cart, setCart] = useState<CartItem[]>([]);
+
+  // The addCustomizedItem function can now be typed correctly
+  const addCustomizedItem = () => {
+    if (selectedItem) {
+      const customizedItem: CartItem = { 
+        ...selectedItem, 
+        customization 
+      };
+      setCart((prevCart) => [...prevCart, customizedItem]);
+      setSelectedItem(null);
+    }
+  };
+
+  
 
   useEffect(() => {
     async function fetchMenuItems() {
@@ -23,8 +62,9 @@ export default function MenuPage() {
         const data = await res.json();
         console.log('Menu Items:', data);
         setMenuItems(data);
+
         // Extract unique categories from item_type property
-        const categories = [...new Set(data.map(item => item.item_type))];
+        const categories = [...new Set(data.map((item: { item_type: string }) => item.item_type))] as string[];
         setMenuCategories(categories);
         if (categories.length > 0) {
           setSelectedCategory(categories[0]);
@@ -44,25 +84,25 @@ export default function MenuPage() {
     : [];
 
   // Open the customization modal for the clicked item
-  const openCustomization = (item) => {
+  // Open the customization modal for the clicked item
+  const openCustomization = (item: {
+    item_id: number;
+    item_name: string;
+    sell_price: number;
+    item_type: string;
+    ingredients?: string[];
+  }) => {
     setSelectedItem(item);
     setCustomization({ ice: "Medium", removedIngredients: [] });
   };
 
-  // Add the customized item to the cart
-  const addCustomizedItem = () => {
-    const customizedItem = { ...selectedItem, customization };
-    setCart((prevCart) => [...prevCart, customizedItem]);
-    setSelectedItem(null);
-  };
-
   // Remove an item from the cart by its index
-  const removeFromCart = (index) => {
+  const removeFromCart = (index: number) => {
     setCart((prevCart) => prevCart.filter((_, i) => i !== index));
   };
 
   // Calculate the total cost using the sell_price of each item
-  const total = cart.reduce((sum, item) => sum + item.sell_price, 0);
+const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
 
   // Handle order checkout: show alert and clear cart
   const handleCheckout = () => {
@@ -133,7 +173,7 @@ export default function MenuPage() {
                 <div key={index} className="p-2 border rounded flex justify-between items-center">
                   <div>
                     <p className="font-bold">{item.item_name}</p>
-                    <p>${item.sell_price.toFixed(2)}</p>
+                    <p>${(item.sell_price ?? 0).toFixed(2)}</p>
                     {item.customization && (
                       <p className="text-sm text-gray-600">
                         Ice: {item.customization.ice}

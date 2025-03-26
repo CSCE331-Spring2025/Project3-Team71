@@ -25,13 +25,12 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
         ) : (
           <div className="relative">
             <button onClick={() => setAccountModalOpen(!accountModalOpen)}>
-              <Image
-                src={session.user?.image} 
-                alt={session.user?.name || 'User'}
-                width={35}
-                height={35}
-                className='rounded-full'
-              />
+            <Image
+              src={(session.user?.image || '/default-avatar.png') as string}
+              alt={session.user?.name || 'User'}
+              width={35}
+              height={35}
+            />
             </button>
             {accountModalOpen && (
                 <div className="absolute top-full mt-2 left-0">
