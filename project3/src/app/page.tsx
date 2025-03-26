@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { Loader } from 'lucide-react';
 
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState([]);
@@ -70,7 +71,14 @@ export default function MenuPage() {
   };
 
   if (isLoading) {
-    return <div>Loading menu...</div>;
+    return (
+    // centered loader while data is being fetched
+      <div className="flex items-center justify-center h-screen">
+        <span className="text-2xl font-bold mr-2">Loading Menu</span>
+        <Loader />
+      </div>
+      
+    );
   }
 
   return (
