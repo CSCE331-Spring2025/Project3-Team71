@@ -15,6 +15,7 @@ interface NavBarClientProps {
 const NavBarClient = ({ session }: NavBarClientProps) => {
   const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [cartModalOpen, setCartModalOpen] = useState(false);
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
 
   const { cart, removeFromCart, clearCart, setCart } = useCart();
   const increaseQuantity = (index: number) => {
@@ -163,10 +164,16 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
                           <div className="mt-3 font-bold text-right w-full">Total: ${total.toFixed(2)}</div>
                           <button
                             onClick={() => {
-                              alert("Order placed!");
-                              clearCart();
+                              if (cart.length === 0) return; // Prevent opening checkout
+                              setCartModalOpen(false);
+                              setCheckoutModalOpen(true);
                             }}
-                            className="mt-3 w-full bg-blue-500 text-white py-2 rounded"
+                            className={`mt-3 w-full py-2 rounded ${
+                              cart.length === 0
+                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                : "bg-blue-500 text-white hover:bg-blue-600"
+                            }`}
+                            disabled={cart.length === 0}
                           >
                             Checkout
                           </button>
@@ -183,6 +190,99 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
             </div>
         )}
       </div>
+      {checkoutModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg w-[90%] max-w-xl shadow-xl relative">
+              <button
+                onClick={() => setCheckoutModalOpen(false)}
+                className="absolute top-2 right-3 text-gray-500 hover:text-black text-xl"
+              >
+                ×
+              </button>
+              <h2 className="text-2xl font-bold mb-4">Checkout</h2>
+
+              <ul className="space-y-3 max-h-64 overflow-y-auto mb-4">
+                {cart.map((item, index) => (
+                  <li key={index} className="border p-3 rounded">
+                  <p className="font-semibold">{item.item_name}</p>
+                  <div className="text-sm text-gray-600 flex items-center gap-2">
+                    ${item.sell_price?.toFixed(2)}
+                    <span className="mx-2">×</span>
+
+                    {/* Quantity controls */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => decreaseQuantity(index)}
+                        className="bg-gray-200 text-gray-700 px-2 rounded"
+                      >
+                        –
+                      </button>
+                      <span>{item.quantity}</span>
+                      <button
+                        onClick={() => increaseQuantity(index)}
+                        className="bg-gray-200 text-gray-700 px-2 rounded"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <span className="ml-auto font-medium">
+                      = ${(item.sell_price! * item.quantity).toFixed(2)}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-gray-500 mt-1">
+                    Ice: {item.customization.ice}
+                    {item.customization.removedIngredients.length > 0 &&
+                      ` | -${item.customization.removedIngredients.join(", ")}`}
+                  </p>
+
+                  <button
+                    onClick={() => removeFromCart(index)}
+                    className="text-red-500 text-xs mt-2"
+                  >
+                    Remove
+                  </button>
+                </li>
+                ))}
+              </ul>
+
+              <div className="font-bold text-right mb-4">
+                Total: $
+                {cart.reduce((sum, item) => sum + item.quantity * (item.sell_price || 0), 0).toFixed(2)}
+              </div>
+
+              <div className="flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  if (cart.length === 0) return;
+                  alert("Order placed!");
+                  clearCart();
+                  setCheckoutModalOpen(false);
+                }}
+                disabled={cart.length === 0}
+                className={`w-full py-2 rounded ${
+                  cart.length === 0
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-green-600 text-white hover:bg-green-700"
+                }`}
+              >
+                Confirm Order
+              </button>
+
+          <button
+            onClick={() => {
+              setCheckoutModalOpen(false);
+              setCartModalOpen(true);
+            }}
+            className="w-full border border-blue-500 text-blue-500 py-2 rounded hover:bg-blue-50"
+          >
+            Return to Cart
+          </button>
+        </div>
+            </div>
+          </div>
+        )}
     </nav>
   );
 };
