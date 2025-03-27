@@ -17,13 +17,19 @@ export default function MenuPage() {
     item_type: string;
     ingredients?: string[];
   } | null>(null);
-  // Default customization: medium ice and no ingredients removed.
+  // Default customization: regular ice, sweetness: normal, teaType: greenTea, toppings: none, and no ingredients removed.
   const [customization, setCustomization] = useState<{
     ice: string;
+    sweetness: string;
+    teaType: string;
     removedIngredients: string[];
+    toppings: string[];
   }>({
-    ice: "Medium", 
-    removedIngredients: []
+    ice: "Regular",
+    sweetness: "Normal",
+    teaType: "Green tea",
+    removedIngredients: [],
+    toppings: []
   });
   interface CartItem {
     item_id?: number;
@@ -33,7 +39,10 @@ export default function MenuPage() {
     ingredients?: string[];
     customization: {
       ice: string;
+      sweetness: string;
+      teaType: string;
       removedIngredients: string[];
+      toppings: string[];
     };
     quantity: number;
   }
@@ -97,7 +106,13 @@ export default function MenuPage() {
     ingredients?: string[];
   }) => {
     setSelectedItem(item);
-    setCustomization({ ice: "Medium", removedIngredients: [] });
+    setCustomization({
+      ice: "Medium", 
+      sweetness: "Normal",  // Add default sweetness
+      teaType: "Green tea", // Add default teaType
+      removedIngredients: [], // This stays as it was
+      toppings: [] // Ensure toppings is initialized as an empty array
+    });
   };
 
 
@@ -165,9 +180,10 @@ const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
 
       {/* Customization Modal */}
       {selectedItem && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg w-96">
+        <div className="fixed top-0 left-0 w-full h-full bg-[#E5CDC8] bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded-lg w-96 max-h-[80vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Customize {selectedItem.item_name}</h2>
+            
             {/* Ice Level Option */}
             <div className="mb-4">
               <label className="block mb-2">Ice Level:</label>
@@ -176,11 +192,42 @@ const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
                 onChange={(e) => setCustomization({...customization, ice: e.target.value})} 
                 className="border p-2 rounded w-full"
               >
-                <option value="Light">Light</option>
-                <option value="Medium">Medium</option>
-                <option value="Heavy">Heavy</option>
+                <option value="Regular">Regular</option>
+                <option value="Less ice">Less ice</option>
+                <option value="No ice">No ice</option>
               </select>
             </div>
+
+            {/* Sweetness Level Option */}
+            <div className="mb-4">
+              <label className="block mb-2">Sweetness Level:</label>
+              <select 
+                value={customization.sweetness} 
+                onChange={(e) => setCustomization({...customization, sweetness: e.target.value})} 
+                className="border p-2 rounded w-full"
+              >
+                <option value="100%">Normal – 100% sugar</option>
+                <option value="80%">Less sweet – 80% sugar</option>
+                <option value="50%">Half sweet – 50% sugar</option>
+                <option value="30%">Light – 30% sugar</option>
+                <option value="0%">No sugar – 0% sugar</option>
+              </select>
+            </div>
+            
+            {/* Type of Tea Option */}
+            <div className="mb-4">
+              <label className="block mb-2">Type of Tea:</label>
+              <select 
+                value={customization.teaType} 
+                onChange={(e) => setCustomization({...customization, teaType: e.target.value})} 
+                className="border p-2 rounded w-full"
+              >
+                <option value="Green tea">Green tea</option>
+                <option value="Black tea">Black tea</option>
+                <option value="Oolong tea">Oolong tea</option>
+              </select>
+            </div>
+
             {/* Remove Ingredients Option */}
             <div className="mb-4">
               <p className="mb-2">Remove Ingredients:</p>
@@ -206,7 +253,7 @@ const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
                         }}
                         className="mr-2"
                       />
-                      Ingredient {ingredient}
+                      {ingredient}
                     </label>
                   </div>
                 ))
@@ -214,6 +261,40 @@ const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
                 <p>No ingredients available for customization.</p>
               )}
             </div>
+            
+            {/* Toppings Option */}
+            <div className="mb-4">
+              <p className="mb-2">Toppings:</p>
+              {[
+                "aloe vera", "aiyu jelly", "lychee jelly", "herb jelly", "mini pearl",
+                "red beans", "creama", "pudding", "ice cream", "crystal boba", "none"
+              ].map((topping) => (
+                <div key={topping}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={customization.toppings.includes(topping)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setCustomization({
+                            ...customization,
+                            toppings: [...customization.toppings, topping]
+                          });
+                        } else {
+                          setCustomization({
+                            ...customization,
+                            toppings: customization.toppings.filter((top) => top !== topping)
+                          });
+                        }
+                      }}
+                      className="mr-2"
+                    />
+                    {topping}
+                  </label>
+                </div>
+              ))}
+            </div>
+
             <div className="flex justify-between">
               <button 
                 onClick={() => setSelectedItem(null)} 
