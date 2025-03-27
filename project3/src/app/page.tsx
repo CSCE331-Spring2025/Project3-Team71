@@ -48,12 +48,18 @@ export default function MenuPage() {
     setCustomization({ ice: "Medium", removedIngredients: [] });
   };
 
-  // Add the customized item to the cart
-  const addCustomizedItem = () => {
-    const customizedItem = { ...selectedItem, customization };
-    setCart((prevCart) => [...prevCart, customizedItem]);
-    setSelectedItem(null);
+// Add the customized item to the cart
+const addCustomizedItem = () => {
+  const customizedItem = {
+    ...selectedItem,
+    ingredients: selectedItem.ingredients ?? [], // ⬅️ ensure ingredients are preserved
+    customization,
   };
+
+  setCart((prevCart) => [...prevCart, customizedItem]);
+  setSelectedItem(null);
+};
+
 
   // Remove an item from the cart by its index
   const removeFromCart = (index) => {
@@ -64,10 +70,55 @@ export default function MenuPage() {
   const total = cart.reduce((sum, item) => sum + item.sell_price, 0);
 
   // Handle order checkout: show alert and clear cart
-  const handleCheckout = () => {
-    alert('Order placed!');
-    setCart([]);
-  };
+const handleCheckout = async () => {
+  // 1. Build ingredient usage map
+  const ingredientUsage = {};
+
+  cart.forEach(item => {
+    if (!item.ingredients) return;
+
+    item.ingredients.forEach(ingredientId => {
+      if (item.customization?.removedIngredients?.includes(ingredientId)) return;
+
+      if (!ingredientUsage[ingredientId]) {
+        ingredientUsage[ingredientId] = 0;
+      }
+      ingredientUsage[ingredientId] += 1; // 1 unit per ingredient per item
+    });
+  });
+
+  // 2. Convert to array for API
+  const items = Object.entries(ingredientUsage).map(([ingredient_id, quantityUsed]) => ({
+    ingredient_id: parseInt(ingredient_id),
+    quantityUsed
+  }));
+
+  // 3. Send to API
+
+console.log('🛒 Cart:', cart);
+console.log('📦 Items payload:', items);
+
+  try {
+    const res = await fetch('/api/updateInventory', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert('Order placed and inventory updated!');
+      setCart([]);
+    } else {
+      alert('Failed to update inventory: ' + data.error);
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Checkout failed due to a network error.');
+  }
+};
+
 
   if (isLoading) {
     return <div>Loading menu...</div>;
@@ -174,7 +225,7 @@ export default function MenuPage() {
               <p className="mb-2">Remove Ingredients:</p>
               {selectedItem.ingredients && selectedItem.ingredients.length > 0 ? (
                 selectedItem.ingredients.map((ingredient) => (
-                  <div key={ingredient}>
+                  <div key={ingredient.id}>
                     <label>
                       <input
                         type="checkbox"
@@ -183,18 +234,18 @@ export default function MenuPage() {
                           if (e.target.checked) {
                             setCustomization({
                               ...customization,
-                              removedIngredients: [...customization.removedIngredients, ingredient]
+                              removedIngredients: [...customization.removedIngredients, ingredient.id]
                             });
                           } else {
                             setCustomization({
                               ...customization,
-                              removedIngredients: customization.removedIngredients.filter((ing) => ing !== ingredient)
+                              removedIngredients: customization.removedIngredients.filter((id) => id !== ingredient.id)
                             });
                           }
                         }}
                         className="mr-2"
                       />
-                      Ingredient {ingredient}
+                      {ingredient.name}
                     </label>
                   </div>
                 ))
