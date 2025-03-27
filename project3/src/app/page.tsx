@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Loader } from 'lucide-react';
+import { useCart } from "@/components/CartContext";
 
 
 export default function MenuPage() {
@@ -34,18 +35,21 @@ export default function MenuPage() {
       ice: string;
       removedIngredients: string[];
     };
+    quantity: number;
   }
   // Update the cart state to use this type
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const { cart, addToCart, removeFromCart, clearCart } = useCart();
+
 
   // The addCustomizedItem function can now be typed correctly
   const addCustomizedItem = () => {
     if (selectedItem) {
       const customizedItem: CartItem = { 
         ...selectedItem, 
-        customization 
+        customization, 
+        quantity: 1
       };
-      setCart((prevCart) => [...prevCart, customizedItem]);
+      addToCart(customizedItem);
       setSelectedItem(null);
     }
   };
@@ -96,10 +100,6 @@ export default function MenuPage() {
     setCustomization({ ice: "Medium", removedIngredients: [] });
   };
 
-  // Remove an item from the cart by its index
-  const removeFromCart = (index: number) => {
-    setCart((prevCart) => prevCart.filter((_, i) => i !== index));
-  };
 
   // Calculate the total cost using the sell_price of each item
 const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
@@ -107,7 +107,7 @@ const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
   // Handle order checkout: show alert and clear cart
   const handleCheckout = () => {
     alert('Order placed!');
-    setCart([]);
+    clearCart();
   };
 
   if (isLoading) {
@@ -159,42 +159,6 @@ const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
             ))
           ) : (
             <p>No items in this category.</p>
-          )}
-        </div>
-
-        {/* Cart Section */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Cart</h2>
-          {cart.length === 0 ? (
-            <p>Your cart is empty.</p>
-          ) : (
-            <div className="space-y-2">
-              {cart.map((item, index) => (
-                <div key={index} className="p-2 border rounded flex justify-between items-center">
-                  <div>
-                    <p className="font-bold">{item.item_name}</p>
-                    <p>${(item.sell_price ?? 0).toFixed(2)}</p>
-                    {item.customization && (
-                      <p className="text-sm text-gray-600">
-                        Ice: {item.customization.ice}
-                        {item.customization.removedIngredients.length > 0 &&
-                          `, Removed: ${item.customization.removedIngredients.join(', ')}`}
-                      </p>
-                    )}
-                  </div>
-                  <button onClick={() => removeFromCart(index)} className="text-red-500">
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <h3 className="text-xl font-bold mt-4">Total: ${total.toFixed(2)}</h3>
-              <button 
-                onClick={handleCheckout} 
-                className="bg-accent text-white p-2 rounded mt-2"
-              >
-                Checkout
-              </button>
-            </div>
           )}
         </div>
       </div>
