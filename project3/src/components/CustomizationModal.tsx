@@ -59,7 +59,7 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-[#E5CDC8] bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-4 rounded-lg w-126 max-h-[80vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Customize {selectedItem?.item_name}</h2>
+        <h2 className="text-xl font-bold mb-4 text-center">Customize {selectedItem?.item_name}</h2>
 
         {/* Ice Level Option */}
         <div className="mb-4">
