@@ -254,11 +254,29 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
 
               <div className="flex flex-col gap-2">
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (cart.length === 0) return;
-                  alert("Order placed!");
-                  clearCart();
-                  setCheckoutModalOpen(false);
+
+                  const res = await fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      items: cart.map((item) => ({
+                        menuItemId: item.item_id,
+                        quantity: item.quantity,
+                      })),
+                    }),
+                  });
+
+                  const data = await res.json();
+
+                  if (data.success) {
+                    alert("Order placed!");
+                    clearCart();
+                    setCheckoutModalOpen(false);
+                  } else {
+                    alert("Checkout failed: " + data.error);
+                  }
                 }}
                 disabled={cart.length === 0}
                 className={`w-full py-2 rounded ${
@@ -269,6 +287,7 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
               >
                 Confirm Order
               </button>
+
 
           <button
             onClick={() => {
