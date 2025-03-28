@@ -1,6 +1,4 @@
-// components/CustomizationModal.tsx
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface CustomizationProps {
   selectedItem: {
@@ -8,7 +6,6 @@ interface CustomizationProps {
     item_name: string;
     sell_price: number;
     item_type: string;
-    ingredients?: string[];
   } | null;
   customization: {
     ice: string;
@@ -28,6 +25,18 @@ interface CustomizationProps {
   closeModal: () => void;
 }
 
+async function GetIngredients(itemId: number): Promise<string[]> {
+  try {
+    const res = await fetch(`/api/ingredients?item_id=${itemId}`);
+    if (!res.ok) throw new Error('Failed to fetch ingredients');
+    const data = await res.json();
+    return data.ingredients || [];
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
 const CustomizationModal: React.FC<CustomizationProps> = ({
   selectedItem,
   customization,
@@ -35,17 +44,29 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
   addCustomizedItem,
   closeModal,
 }) => {
+  const [ingredients, setIngredients] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchIngredients() {
+      if (selectedItem?.item_id) {
+        const fetchedIngredients = await GetIngredients(selectedItem.item_id);
+        setIngredients(fetchedIngredients);
+      }
+    }
+    fetchIngredients();
+  }, [selectedItem]);
+
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-[#E5CDC8] bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-4 rounded-lg w-96 max-h-[80vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">Customize {selectedItem?.item_name}</h2>
-        
+
         {/* Ice Level Option */}
         <div className="mb-4">
           <label className="block mb-2">Ice Level:</label>
-          <select 
-            value={customization.ice} 
-            onChange={(e) => setCustomization({...customization, ice: e.target.value})} 
+          <select
+            value={customization.ice}
+            onChange={(e) => setCustomization({ ...customization, ice: e.target.value })}
             className="border p-2 rounded w-full"
           >
             <option value="Regular">Regular</option>
@@ -57,9 +78,9 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
         {/* Sweetness Level Option */}
         <div className="mb-4">
           <label className="block mb-2">Sweetness Level:</label>
-          <select 
-            value={customization.sweetness} 
-            onChange={(e) => setCustomization({...customization, sweetness: e.target.value})} 
+          <select
+            value={customization.sweetness}
+            onChange={(e) => setCustomization({ ...customization, sweetness: e.target.value })}
             className="border p-2 rounded w-full"
           >
             <option value="100%">Normal – 100% sugar</option>
@@ -69,13 +90,13 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
             <option value="0%">No sugar – 0% sugar</option>
           </select>
         </div>
-        
+
         {/* Type of Tea Option */}
         <div className="mb-4">
           <label className="block mb-2">Type of Tea:</label>
-          <select 
-            value={customization.teaType} 
-            onChange={(e) => setCustomization({...customization, teaType: e.target.value})} 
+          <select
+            value={customization.teaType}
+            onChange={(e) => setCustomization({ ...customization, teaType: e.target.value })}
             className="border p-2 rounded w-full"
           >
             <option value="Green tea">Green tea</option>
@@ -84,11 +105,11 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
           </select>
         </div>
 
-        {/* Remove Ingredients Option */}
+        {/* Remove Ingredients Option (Dynamically Fetched) */}
         <div className="mb-4">
           <p className="mb-2">Remove Ingredients:</p>
-          {selectedItem?.ingredients && selectedItem.ingredients.length > 0 ? (
-            selectedItem.ingredients.map((ingredient) => (
+          {ingredients.length > 0 ? (
+            ingredients.map((ingredient) => (
               <div key={ingredient}>
                 <label>
                   <input
@@ -98,12 +119,14 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
                       if (e.target.checked) {
                         setCustomization({
                           ...customization,
-                          removedIngredients: [...customization.removedIngredients, ingredient]
+                          removedIngredients: [...customization.removedIngredients, ingredient],
                         });
                       } else {
                         setCustomization({
                           ...customization,
-                          removedIngredients: customization.removedIngredients.filter((ing) => ing !== ingredient)
+                          removedIngredients: customization.removedIngredients.filter(
+                            (ing) => ing !== ingredient
+                          ),
                         });
                       }
                     }}
@@ -117,13 +140,13 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
             <p>No ingredients available for customization.</p>
           )}
         </div>
-        
+
         {/* Toppings Option */}
         <div className="mb-4">
           <p className="mb-2">Toppings:</p>
           {[
             "aloe vera", "aiyu jelly", "lychee jelly", "herb jelly", "mini pearl",
-            "red beans", "creama", "pudding", "ice cream", "crystal boba"
+            "red beans", "creama", "pudding", "ice cream", "crystal boba",
           ].map((topping) => (
             <div key={topping}>
               <label>
@@ -134,12 +157,12 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
                     if (e.target.checked) {
                       setCustomization({
                         ...customization,
-                        toppings: [...customization.toppings, topping]
+                        toppings: [...customization.toppings, topping],
                       });
                     } else {
                       setCustomization({
                         ...customization,
-                        toppings: customization.toppings.filter((top) => top !== topping)
+                        toppings: customization.toppings.filter((top) => top !== topping),
                       });
                     }
                   }}
@@ -152,16 +175,10 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
         </div>
 
         <div className="flex justify-between">
-          <button 
-            onClick={closeModal} 
-            className="px-4 py-2 border rounded"
-          >
+          <button onClick={closeModal} className="px-4 py-2 border rounded">
             Cancel
           </button>
-          <button 
-            onClick={addCustomizedItem} 
-            className="px-4 py-2 bg-accent text-white rounded"
-          >
+          <button onClick={addCustomizedItem} className="px-4 py-2 bg-accent text-white rounded">
             Add to Cart
           </button>
         </div>

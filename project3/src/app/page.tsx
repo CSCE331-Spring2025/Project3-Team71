@@ -63,7 +63,6 @@ export default function MenuPage() {
       setSelectedItem(null);
     }
   };
-
   
 
   useEffect(() => {
