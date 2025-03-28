@@ -5,7 +5,6 @@ import { Loader } from 'lucide-react';
 import { useCart } from "@/components/CartContext";
 import CustomizationModal from "@/components/CustomizationModal";
 
-
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [menuCategories, setMenuCategories] = useState<string[]>([]);
@@ -50,7 +49,6 @@ export default function MenuPage() {
   // Update the cart state to use this type
   const { cart, addToCart, removeFromCart, clearCart } = useCart();
 
-
   // The addCustomizedItem function can now be typed correctly
   const addCustomizedItem = () => {
     if (selectedItem) {
@@ -63,7 +61,6 @@ export default function MenuPage() {
       setSelectedItem(null);
     }
   };
-  
 
   useEffect(() => {
     async function fetchMenuItems() {
@@ -97,7 +94,6 @@ export default function MenuPage() {
     : [];
 
   // Open the customization modal for the clicked item
-  // Open the customization modal for the clicked item
   const openCustomization = (item: {
     item_id: number;
     item_name: string;
@@ -115,9 +111,8 @@ export default function MenuPage() {
     });
   };
 
-
   // Calculate the total cost using the sell_price of each item
-const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
+  const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
 
   // Handle order checkout: show alert and clear cart
   const handleCheckout = () => {
@@ -127,12 +122,11 @@ const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
 
   if (isLoading) {
     return (
-    // centered loader while data is being fetched
+      // centered loader while data is being fetched
       <div className="flex items-center justify-center h-screen">
         <span className="text-2xl font-bold mr-2">Loading Menu</span>
         <Loader />
       </div>
-      
     );
   }
 
@@ -168,6 +162,15 @@ const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
                 className="bg-background p-4 rounded-lg shadow-md cursor-pointer"
                 onClick={() => openCustomization(item)}
               >
+                {/* Display the image corresponding to the item_id */}
+                <div className="relative w-full aspect-square mb-2">
+                <img
+                  src={`/images/${item.item_id}.jpg`}
+                  alt={item.item_name}
+                  className="absolute inset-0 w-full h-full object-cover rounded"
+                />
+                </div>
+
                 <h3 className="font-bold text-accent text-lg">{item.item_name}</h3>
                 <p className="text-text">${item.sell_price.toFixed(2)}</p>
               </div>
@@ -181,12 +184,12 @@ const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
       {/* Customization Modal */}
       {selectedItem && (
         <CustomizationModal
-        selectedItem={selectedItem}
-        customization={customization}
-        setCustomization={setCustomization}
-        addCustomizedItem={addCustomizedItem}
-        closeModal={() => setSelectedItem(null)}
-      />
+          selectedItem={selectedItem}
+          customization={customization}
+          setCustomization={setCustomization}
+          addCustomizedItem={addCustomizedItem}
+          closeModal={() => setSelectedItem(null)}
+        />
       )}
     </div>
   );
