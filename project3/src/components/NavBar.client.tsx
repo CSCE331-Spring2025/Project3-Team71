@@ -16,6 +16,8 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
   const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+
 
   const { cart, removeFromCart, clearCart, setCart } = useCart();
   const increaseQuantity = (index: number) => {
@@ -289,7 +291,7 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
               <button
                 onClick={async () => {
                   if (cart.length === 0) return;
-
+                
                   const res = await fetch('/api/checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -300,18 +302,23 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
                       })),
                     }),
                   });
-
+                
                   const data = await res.json();
-
+                
                   if (data.success) {
-                    alert("Order placed!");
+                    setShowCelebration(true);  // Show the mascot GIF
+                
+                    setTimeout(() => {
+                      setShowCelebration(false); // Hide it after 3 seconds
+                    }, 2000);
+                
+                    // alert("Order placed!");
                     clearCart();
                     setCheckoutModalOpen(false);
                   } else {
                     alert("Checkout failed: " + data.error);
                   }
                 }}
-                disabled={cart.length === 0}
                 className={`w-full py-2 rounded ${
                   cart.length === 0
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -335,6 +342,18 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
             </div>
           </div>
         )}
+        {showCelebration && (
+          <div className="fixed inset-0 flex flex-col items-center justify-center bg-opacity-80 z-50" style={{ backgroundColor: "#E5CDC8" }}>
+            <img
+              src="/mascotConfetti.gif"
+              alt="Celebration"
+              className="w-64 h-64"
+            />
+            {/* order placed text */}
+            <p className="text-2xl font-bold text-black animate-bounce">Order Placed!</p>
+          </div>
+        )}
+
     </nav>
   );
 };
