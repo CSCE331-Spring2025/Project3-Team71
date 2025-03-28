@@ -231,11 +231,28 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
                     </span>
                   </div>
 
-                  <p className="text-xs text-gray-500 mt-1">
-                    Ice: {item.customization.ice}
-                    {item.customization.removedIngredients.length > 0 &&
-                      ` | -${item.customization.removedIngredients.join(", ")}`}
-                  </p>
+                  {(
+                    item.customization.ice !== "Medium" ||
+                    item.customization.sweetness !== "Normal" ||
+                    item.customization.teaType !== "Green tea" ||
+                    item.customization.removedIngredients.length > 0 ||
+                    item.customization.toppings.length > 0
+                  ) && (
+                    <div className="text-xs text-yellow-700 mt-1 italic">
+                      * Customization:
+                      <ul className="list-disc list-inside">
+                        {item.customization.ice !== "Medium" && <li>Ice: {item.customization.ice}</li>}
+                        {item.customization.sweetness !== "Normal" && <li>Sweetness: {item.customization.sweetness}</li>}
+                        {item.customization.teaType !== "Green tea" && <li>Tea Type: {item.customization.teaType}</li>}
+                        {item.customization.removedIngredients.length > 0 && (
+                          <li>Removed: {item.customization.removedIngredients.join(", ")}</li>
+                        )}
+                        {item.customization.toppings.length > 0 && (
+                          <li>Toppings: {item.customization.toppings.join(", ")}</li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
 
                   <button
                     onClick={() => removeFromCart(index)}
