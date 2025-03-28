@@ -2,11 +2,10 @@ import { Pool } from 'pg';
 
 const pool = new Pool({
   user: 'team_71',
-  host: 'csce-315-db.engr.tamu.edu',
-  database: 'team_71_db',
-  password: 'Team71Rox',
-  port: 5432,
-  ssl: { rejectUnauthorized: false },
+  host: process.env.DATABASE_HOST,
+  database: process.env.DATABASE_NAME,
+  password: process.env.DATABASE_PASSWORD,
+  port: parseInt(process.env.DATABASE_PORT || '5432'),
 });
 
 export default pool;

@@ -3,7 +3,7 @@ import { signIn, signOut } from "@/auth";
 
 export async function doLogin(formData) {
   const action = formData.get('action');
-  const redirectPage = action === "employee" ? "/employee" : "/manager";
+  const redirectPage = action === "employee" ? "/" : "/manager";
   
   try {
     const response = await signIn("google", { 

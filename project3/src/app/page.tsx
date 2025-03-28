@@ -1,16 +1,69 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { Loader } from 'lucide-react';
+import { useCart } from "@/components/CartContext";
+import CustomizationModal from "@/components/CustomizationModal";
+
 
 export default function MenuPage() {
-  const [menuItems, setMenuItems] = useState([]);
-  const [menuCategories, setMenuCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [menuCategories, setMenuCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedItem, setSelectedItem] = useState(null);
-  // Default customization: medium ice and no ingredients removed.
-  const [customization, setCustomization] = useState({ ice: "Medium", removedIngredients: [] });
-  const [cart, setCart] = useState([]);
+  const [selectedItem, setSelectedItem] = useState<{
+    item_id: number;
+    item_name: string;
+    sell_price: number;
+    item_type: string;
+    ingredients?: string[];
+  } | null>(null);
+  // Default customization: regular ice, sweetness: normal, teaType: greenTea, toppings: none, and no ingredients removed.
+  const [customization, setCustomization] = useState<{
+    ice: string;
+    sweetness: string;
+    teaType: string;
+    removedIngredients: string[];
+    toppings: string[];
+  }>({
+    ice: "Regular",
+    sweetness: "Normal",
+    teaType: "Green tea",
+    removedIngredients: [],
+    toppings: []
+  });
+  interface CartItem {
+    item_id?: number;
+    item_name?: string;
+    sell_price?: number;
+    item_type?: string;
+    ingredients?: string[];
+    customization: {
+      ice: string;
+      sweetness: string;
+      teaType: string;
+      removedIngredients: string[];
+      toppings: string[];
+    };
+    quantity: number;
+  }
+  // Update the cart state to use this type
+  const { cart, addToCart, removeFromCart, clearCart } = useCart();
+
+
+  // The addCustomizedItem function can now be typed correctly
+  const addCustomizedItem = () => {
+    if (selectedItem) {
+      const customizedItem: CartItem = { 
+        ...selectedItem, 
+        customization, 
+        quantity: 1
+      };
+      addToCart(customizedItem);
+      setSelectedItem(null);
+    }
+  };
+  
 
   useEffect(() => {
     async function fetchMenuItems() {
@@ -22,8 +75,9 @@ export default function MenuPage() {
         const data = await res.json();
         console.log('Menu Items:', data);
         setMenuItems(data);
+
         // Extract unique categories from item_type property
-        const categories = [...new Set(data.map(item => item.item_type))];
+        const categories = [...new Set(data.map((item: { item_type: string }) => item.item_type))] as string[];
         setMenuCategories(categories);
         if (categories.length > 0) {
           setSelectedCategory(categories[0]);
@@ -43,85 +97,153 @@ export default function MenuPage() {
     : [];
 
   // Open the customization modal for the clicked item
-  const openCustomization = (item) => {
+  // Open the customization modal for the clicked item
+  const openCustomization = (item: {
+    item_id: number;
+    item_name: string;
+    sell_price: number;
+    item_type: string;
+    ingredients?: string[];
+  }) => {
     setSelectedItem(item);
-    setCustomization({ ice: "Medium", removedIngredients: [] });
+    setCustomization({
+      ice: "Medium", 
+      sweetness: "Normal",  // Add default sweetness
+      teaType: "Green tea", // Add default teaType
+      removedIngredients: [], // This stays as it was
+      toppings: [] // Ensure toppings is initialized as an empty array
+    });
   };
 
-// Add the customized item to the cart
-const addCustomizedItem = () => {
-  const customizedItem = {
-    ...selectedItem,
-    ingredients: selectedItem.ingredients ?? [], // ⬅️ ensure ingredients are preserved
-    customization,
-  };
-
-  setCart((prevCart) => [...prevCart, customizedItem]);
-  setSelectedItem(null);
-};
-
-
-  // Remove an item from the cart by its index
-  const removeFromCart = (index) => {
-    setCart((prevCart) => prevCart.filter((_, i) => i !== index));
-  };
 
   // Calculate the total cost using the sell_price of each item
-  const total = cart.reduce((sum, item) => sum + item.sell_price, 0);
+const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
 
   // Handle order checkout: show alert and clear cart
-const handleCheckout = async () => {
-  // 1. Build ingredient usage map
-  const ingredientUsage = {};
-
-  cart.forEach(item => {
-    if (!item.ingredients) return;
-
-    item.ingredients.forEach(ingredientId => {
-      if (item.customization?.removedIngredients?.includes(ingredientId)) return;
-
-      if (!ingredientUsage[ingredientId]) {
-        ingredientUsage[ingredientId] = 0;
+  const handleCheckout = async () => {
+    try {
+      if (cart.length === 0) {
+        alert('Your cart is empty');
+        return;
       }
-      ingredientUsage[ingredientId] += 1; // 1 unit per ingredient per item
-    });
-  });
-
-  // 2. Convert to array for API
-  const items = Object.entries(ingredientUsage).map(([ingredient_id, quantityUsed]) => ({
-    ingredient_id: parseInt(ingredient_id),
-    quantityUsed
-  }));
-
-  // 3. Send to API
-
-console.log('🛒 Cart:', cart);
-console.log('📦 Items payload:', items);
-
-  try {
-    const res = await fetch('/api/updateInventory', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items }),
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      alert('Order placed and inventory updated!');
-      setCart([]);
-    } else {
-      alert('Failed to update inventory: ' + data.error);
+  
+      // Define which ingredients are used for each menu item and topping
+      const ingredientMappings = {
+        // Base drinks (ingredient_id: quantity used)
+        "Classic Milk Tea": [
+          { ingredient_id: 1, quantityUsed: 5 },  // Black Tea Leaves
+          { ingredient_id: 3, quantityUsed: 10 }, // Milk Powder
+          { ingredient_id: 12, quantityUsed: 1 }, // Cups
+          { ingredient_id: 13, quantityUsed: 1 }, // Straws
+          { ingredient_id: 16, quantityUsed: 10 } // Ice
+        ],
+        "Green Milk Tea": [
+          { ingredient_id: 2, quantityUsed: 5 },  // Green Tea Leaves
+          { ingredient_id: 3, quantityUsed: 10 }, // Milk Powder
+          { ingredient_id: 12, quantityUsed: 1 }, // Cups
+          { ingredient_id: 13, quantityUsed: 1 }, // Straws
+          { ingredient_id: 16, quantityUsed: 10 } // Ice
+        ],
+        // Add more mappings as needed for other menu items
+        
+        // Toppings
+        "Boba Pearls": [{ ingredient_id: 5, quantityUsed: 30 }],
+        "Tapioca Pearls": [{ ingredient_id: 6, quantityUsed: 30 }],
+        "Lychee Jelly": [{ ingredient_id: 9, quantityUsed: 20 }],
+        "Coconut Jelly": [{ ingredient_id: 18, quantityUsed: 20 }],
+        "Popping Boba": [{ ingredient_id: 20, quantityUsed: 20 }]
+      };
+  
+      // Calculate ingredients used from the cart
+      const inventoryUpdates = [];
+      
+      for (const item of cart) {
+        // Multiply quantities by item quantity
+        const quantity = item.quantity || 1;
+        
+        // Add base drink ingredients
+        const baseIngredients = ingredientMappings[item.item_name] || [];
+        for (const ingredient of baseIngredients) {
+          inventoryUpdates.push({
+            ingredient_id: ingredient.ingredient_id,
+            quantityUsed: ingredient.quantityUsed * quantity
+          });
+        }
+        
+        // Add ingredients for each topping
+        if (item.customization && item.customization.toppings) {
+          for (const topping of item.customization.toppings) {
+            const toppingIngredients = ingredientMappings[topping] || [];
+            for (const ingredient of toppingIngredients) {
+              inventoryUpdates.push({
+                ingredient_id: ingredient.ingredient_id,
+                quantityUsed: ingredient.quantityUsed * quantity
+              });
+            }
+          }
+        }
+      }
+      
+      // Combine duplicate ingredient updates
+      const consolidatedUpdates = {};
+      for (const update of inventoryUpdates) {
+        if (!consolidatedUpdates[update.ingredient_id]) {
+          consolidatedUpdates[update.ingredient_id] = update.quantityUsed;
+        } else {
+          consolidatedUpdates[update.ingredient_id] += update.quantityUsed;
+        }
+      }
+      
+      // Convert to the format expected by the API
+      const items = Object.entries(consolidatedUpdates).map(([ingredient_id, quantityUsed]) => ({
+        ingredient_id: parseInt(ingredient_id),
+        quantityUsed
+      }));
+      
+      console.log("Sending inventory update:", items);
+      
+      // Call the updateInventory API
+      const response = await fetch('/api/updateInventory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ items }),
+      });
+      
+      const result = await response.json();
+      console.log("Inventory update response:", result);
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update inventory');
+      }
+      
+      // Check for low inventory warnings
+      if (result.lowInventoryItems && result.lowInventoryItems.length > 0) {
+        alert(`Order placed successfully, but some ingredients are running low: ${
+          result.lowInventoryItems.map(item => `${item.name} (${item.remaining}/${item.minimum})`).join(', ')
+        }`);
+      } else {
+        alert('Order placed successfully!');
+      }
+      
+      // Clear cart after successful checkout
+      clearCart();
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert(`Checkout failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-  } catch (err) {
-    console.error(err);
-    alert('Checkout failed due to a network error.');
-  }
-};
-
+  };
 
   if (isLoading) {
-    return <div>Loading menu...</div>;
+    return (
+    // centered loader while data is being fetched
+      <div className="flex items-center justify-center h-screen">
+        <span className="text-2xl font-bold mr-2">Loading Menu</span>
+        <Loader />
+      </div>
+      
+    );
   }
 
   return (
@@ -164,111 +286,17 @@ console.log('📦 Items payload:', items);
             <p>No items in this category.</p>
           )}
         </div>
-
-        {/* Cart Section */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Cart</h2>
-          {cart.length === 0 ? (
-            <p>Your cart is empty.</p>
-          ) : (
-            <div className="space-y-2">
-              {cart.map((item, index) => (
-                <div key={index} className="p-2 border rounded flex justify-between items-center">
-                  <div>
-                    <p className="font-bold">{item.item_name}</p>
-                    <p>${item.sell_price.toFixed(2)}</p>
-                    {item.customization && (
-                      <p className="text-sm text-gray-600">
-                        Ice: {item.customization.ice}
-                        {item.customization.removedIngredients.length > 0 &&
-                          `, Removed: ${item.customization.removedIngredients.join(', ')}`}
-                      </p>
-                    )}
-                  </div>
-                  <button onClick={() => removeFromCart(index)} className="text-red-500">
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <h3 className="text-xl font-bold mt-4">Total: ${total.toFixed(2)}</h3>
-              <button 
-                onClick={handleCheckout} 
-                className="bg-accent text-white p-2 rounded mt-2"
-              >
-                Checkout
-              </button>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Customization Modal */}
       {selectedItem && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg w-96">
-            <h2 className="text-xl font-bold mb-4">Customize {selectedItem.item_name}</h2>
-            {/* Ice Level Option */}
-            <div className="mb-4">
-              <label className="block mb-2">Ice Level:</label>
-              <select 
-                value={customization.ice} 
-                onChange={(e) => setCustomization({...customization, ice: e.target.value})} 
-                className="border p-2 rounded w-full"
-              >
-                <option value="Light">Light</option>
-                <option value="Medium">Medium</option>
-                <option value="Heavy">Heavy</option>
-              </select>
-            </div>
-            {/* Remove Ingredients Option */}
-            <div className="mb-4">
-              <p className="mb-2">Remove Ingredients:</p>
-              {selectedItem.ingredients && selectedItem.ingredients.length > 0 ? (
-                selectedItem.ingredients.map((ingredient) => (
-                  <div key={ingredient.id}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={customization.removedIngredients.includes(ingredient)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setCustomization({
-                              ...customization,
-                              removedIngredients: [...customization.removedIngredients, ingredient.id]
-                            });
-                          } else {
-                            setCustomization({
-                              ...customization,
-                              removedIngredients: customization.removedIngredients.filter((id) => id !== ingredient.id)
-                            });
-                          }
-                        }}
-                        className="mr-2"
-                      />
-                      {ingredient.name}
-                    </label>
-                  </div>
-                ))
-              ) : (
-                <p>No ingredients available for customization.</p>
-              )}
-            </div>
-            <div className="flex justify-between">
-              <button 
-                onClick={() => setSelectedItem(null)} 
-                className="px-4 py-2 border rounded"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={addCustomizedItem} 
-                className="px-4 py-2 bg-accent text-white rounded"
-              >
-                Add to Cart
-              </button>
-            </div>
-          </div>
-        </div>
+        <CustomizationModal
+        selectedItem={selectedItem}
+        customization={customization}
+        setCustomization={setCustomization}
+        addCustomizedItem={addCustomizedItem}
+        closeModal={() => setSelectedItem(null)}
+      />
       )}
     </div>
   );
