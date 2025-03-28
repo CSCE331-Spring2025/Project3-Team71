@@ -115,7 +115,7 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
                     <p className="text-sm text-gray-500">Your cart is empty.</p>
                       ) : (
                         <>
-                          <ul className="max-h-[400px] overflow-y-auto space-y-2 w-full">
+                          <ul className="max-h-[70vh] overflow-y-auto space-y-2 w-full">
                             {cart.map((item, index) => (
                               <li key={index} className="border-b pb-2">
                                 <div className="flex justify-between items-start">
