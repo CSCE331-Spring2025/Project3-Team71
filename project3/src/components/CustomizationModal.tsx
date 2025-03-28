@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface CustomizationProps {
   selectedItem: {
@@ -45,11 +46,14 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
   closeModal,
 }) => {
   const [ingredients, setIngredients] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchIngredients() {
       if (selectedItem?.item_id) {
+        setIsLoading(true);
         const fetchedIngredients = await GetIngredients(selectedItem.item_id);
+        setIsLoading(false);
         setIngredients(fetchedIngredients);
       }
     }
@@ -59,11 +63,11 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-[#E5CDC8] bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-4 rounded-lg w-126 max-h-[80vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4 text-center">Customize {selectedItem?.item_name}</h2>
+        <h2 className="text-xl font-bold text-accent mb-4 text-center">Customize {selectedItem?.item_name}</h2>
 
         {/* Ice Level Option */}
         <div className="mb-4">
-          <label className="block mb-2">Ice Level:</label>
+          <label className="block mb-2 text-accent font-semibold">Ice Level:</label>
           <select
             value={customization.ice}
             onChange={(e) => setCustomization({ ...customization, ice: e.target.value })}
@@ -77,7 +81,7 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
 
         {/* Sweetness Level Option */}
         <div className="mb-4">
-          <label className="block mb-2">Sweetness Level:</label>
+          <label className="block mb-2 text-accent font-semibold">Sweetness Level:</label>
           <select
             value={customization.sweetness}
             onChange={(e) => setCustomization({ ...customization, sweetness: e.target.value })}
@@ -93,7 +97,7 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
 
         {/* Type of Tea Option */}
         <div className="mb-4">
-          <label className="block mb-2">Type of Tea:</label>
+          <label className="block mb-2 text-accent font-semibold">Type of Tea:</label>
           <select
             value={customization.teaType}
             onChange={(e) => setCustomization({ ...customization, teaType: e.target.value })}
@@ -107,7 +111,18 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
 
         {/* Remove Ingredients Option (Dynamically Fetched) */}
         <div className="mb-4">
-          <p className="mb-2">Remove Ingredients:</p>
+          <p className="mb-2 text-accent font-semibold">Remove Ingredients:</p>
+          {isLoading && (
+            <div className="flex flex-col">
+              <Image
+                src="/mascotDancing.gif"
+                alt="mascot"
+                width={75}
+                height={100}
+              />
+            </div>
+
+          )}
           {ingredients.length > 0 ? (
             ingredients.map((ingredient) => (
               <div key={ingredient}>
@@ -143,7 +158,7 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
 
         {/* Toppings Option */}
         <div className="mb-4">
-          <p className="mb-2">Toppings:</p>
+          <p className="mb-2 text-accent font-semibold">Toppings:</p>
           {[
             "aloe vera", "aiyu jelly", "lychee jelly", "herb jelly", "mini pearl",
             "red beans", "creama", "pudding", "ice cream", "crystal boba",

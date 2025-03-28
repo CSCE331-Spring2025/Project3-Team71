@@ -139,7 +139,7 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="flex mx-4 mt-10">
+    <div className="flex mx-4 mt-10 mb-10 space-x-4 pt-16">
       {/* Categories Column */}
       <div className="w-64 pr-4 border-r">
         <div className="flex flex-col space-y-2">
@@ -149,8 +149,8 @@ export default function MenuPage() {
               onClick={() => setSelectedCategory(category)}
               className={`w-full text-center p-2 rounded ${
                 selectedCategory === category 
-                  ? 'bg-accent text-white' 
-                  : 'bg-primary text-black hover:bg-primary/80'
+                  ? 'bg-accent font-bold text-white' 
+                  : 'bg-primary font-bold text-accent hover:bg-primary border border-primary border-2'
               }`}
             >
               {category}
@@ -160,14 +160,14 @@ export default function MenuPage() {
       </div>
 
       {/* Menu Items and Cart Column */}
-      <div className="flex-1 pl-4">
-        <h2 className="text-2xl font-bold mb-4">{selectedCategory} Menu</h2>
+      <div className="flex-1 pl-4 mb-10">
+        <h2 className="text-2xl text-accent font-bold ml-1 mb-4">{selectedCategory} Menu</h2>
         <div className="grid grid-cols-3 gap-4">
           {filteredMenuItems.length > 0 ? (
             filteredMenuItems.map((item) => (
               <div 
                 key={item.item_id} 
-                className="bg-background p-4 rounded-lg shadow-md cursor-pointer"
+                className="bg-white border border-3 border-primary p-4 rounded-lg shadow-md cursor-pointer"
                 onClick={() => openCustomization(item)}
               >
                 {/* Display the image corresponding to the item_id */}
@@ -175,7 +175,7 @@ export default function MenuPage() {
                 <img
                   src={`/images/${item.item_id}.jpg`}
                   alt={item.item_name}
-                  className="absolute inset-0 w-full h-full object-cover rounded"
+                  className="absolute border border-2 border-primary inset-0 w-full h-full object-cover rounded"
                 />
                 </div>
 
