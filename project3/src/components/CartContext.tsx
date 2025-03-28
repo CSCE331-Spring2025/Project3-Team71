@@ -3,9 +3,12 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 
 interface Customization {
-  ice: string;
-  removedIngredients: string[];
-}
+    ice: string;
+    sweetness: string;
+    teaType: string;
+    removedIngredients: string[];
+    toppings: string[];
+  }
 
 export interface CartItem {
   item_id?: number;
@@ -35,8 +38,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const existingIndex = prev.findIndex(
         (item) =>
           item.item_id === newItem.item_id &&
-          item.customization.ice === newItem.customization.ice &&
-          JSON.stringify(item.customization.removedIngredients) === JSON.stringify(newItem.customization.removedIngredients)
+            JSON.stringify(item.customization) === JSON.stringify(newItem.customization)
       );
   
       if (existingIndex !== -1) {

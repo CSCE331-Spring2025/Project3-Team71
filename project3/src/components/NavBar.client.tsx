@@ -115,7 +115,7 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
                     <p className="text-sm text-gray-500">Your cart is empty.</p>
                       ) : (
                         <>
-                          <ul className="max-h-48 overflow-y-auto space-y-2 w-full">
+                          <ul className="max-h-[70vh] overflow-y-auto space-y-2 w-full">
                             {cart.map((item, index) => (
                               <li key={index} className="border-b pb-2">
                                 <div className="flex justify-between items-start">
@@ -144,12 +144,28 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
                                         +
                                       </button>
                                     </div>
-                                    <p className="text-xs text-gray-500">
-                                      Ice: {item.customization.ice}
-                                      {item.customization.removedIngredients.length > 0 && (
-                                        <> | -{item.customization.removedIngredients.join(", ")}</>
-                                      )}
-                                    </p>
+                                    {(
+                                      item.customization.ice !== "Medium" ||
+                                      item.customization.sweetness !== "Normal" ||
+                                      item.customization.teaType !== "Green tea" ||
+                                      item.customization.removedIngredients.length > 0 ||
+                                      item.customization.toppings.length > 0
+                                    ) && (
+                                      <div className="text-xs text-yellow-700 mt-1 italic">
+                                        * Customization:
+                                        <ul className="list-disc list-inside">
+                                          {item.customization.ice !== "Medium" && <li>Ice: {item.customization.ice}</li>}
+                                          {item.customization.sweetness !== "Normal" && <li>Sweetness: {item.customization.sweetness}</li>}
+                                          {item.customization.teaType !== "Green tea" && <li>Tea Type: {item.customization.teaType}</li>}
+                                          {item.customization.removedIngredients.length > 0 && (
+                                            <li>Removed: {item.customization.removedIngredients.join(", ")}</li>
+                                          )}
+                                          {item.customization.toppings.length > 0 && (
+                                            <li>Toppings: {item.customization.toppings.join(", ")}</li>
+                                          )}
+                                        </ul>
+                                      </div>
+                                    )}
                                   </div>
                                   <button
                                     onClick={() => removeFromCart(index)}
@@ -201,7 +217,7 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
               </button>
               <h2 className="text-2xl font-bold mb-4">Checkout</h2>
 
-              <ul className="space-y-3 max-h-64 overflow-y-auto mb-4">
+              <ul className="space-y-3 max-h-100 overflow-y-auto mb-4">
                 {cart.map((item, index) => (
                   <li key={index} className="border p-3 rounded">
                   <p className="font-semibold">{item.item_name}</p>
@@ -231,11 +247,28 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
                     </span>
                   </div>
 
-                  <p className="text-xs text-gray-500 mt-1">
-                    Ice: {item.customization.ice}
-                    {item.customization.removedIngredients.length > 0 &&
-                      ` | -${item.customization.removedIngredients.join(", ")}`}
-                  </p>
+                  {(
+                    item.customization.ice !== "Medium" ||
+                    item.customization.sweetness !== "Normal" ||
+                    item.customization.teaType !== "Green tea" ||
+                    item.customization.removedIngredients.length > 0 ||
+                    item.customization.toppings.length > 0
+                  ) && (
+                    <div className="text-xs text-yellow-700 mt-1 italic">
+                      * Customization:
+                      <ul className="list-disc list-inside">
+                        {item.customization.ice !== "Medium" && <li>Ice: {item.customization.ice}</li>}
+                        {item.customization.sweetness !== "Normal" && <li>Sweetness: {item.customization.sweetness}</li>}
+                        {item.customization.teaType !== "Green tea" && <li>Tea Type: {item.customization.teaType}</li>}
+                        {item.customization.removedIngredients.length > 0 && (
+                          <li>Removed: {item.customization.removedIngredients.join(", ")}</li>
+                        )}
+                        {item.customization.toppings.length > 0 && (
+                          <li>Toppings: {item.customization.toppings.join(", ")}</li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
 
                   <button
                     onClick={() => removeFromCart(index)}
