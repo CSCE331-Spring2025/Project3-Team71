@@ -1,28 +1,17 @@
-import React from 'react'
-import { auth } from '@/auth'
-import { redirect } from 'next/navigation'
-import Logout from '@/components/Logout'
-import Image from 'next/image'
+"use client";
 
-const ManagerPage = async () => {
-  const session = await auth();
-  
-    if (!session?.user) redirect("/");
+import Link from "next/link";
+
+export default function ManagerPage() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <h1 className="text-3xl my-3"> Manager {session?.user?.name}</h1>
-      
-      <Image
-        src={session?.user?.image ?? "/default-avatar.png"} // Use a default image if `image` is null or undefined
-        alt={session?.user?.name ?? "User avatar"}
-        width={72}
-        height={72}
-      />
-
-
-      <Logout />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <h1 className="text-3xl font-bold mb-6">Manager Dashboard</h1>
+      {/* Button to navigate to the menu boards page */}
+      <Link href="/manager/menu_boards">
+        <button className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+          Show Menu Boards
+        </button>
+      </Link>
     </div>
-  )
+  );
 }
-
-export default ManagerPage
