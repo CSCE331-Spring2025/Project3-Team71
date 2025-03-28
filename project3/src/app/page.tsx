@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Loader } from 'lucide-react';
 import { useCart } from "@/components/CartContext";
 import CustomizationModal from "@/components/CustomizationModal";
+import Image from 'next/image';
 
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<any[]>([]);
@@ -124,8 +125,15 @@ export default function MenuPage() {
     return (
       // centered loader while data is being fetched
       <div className="flex items-center justify-center h-screen">
-        <span className="text-2xl font-bold mr-2">Loading Menu</span>
-        <Loader />
+        <span className="text-2xl font-bold">Loading Menu...</span>
+        <div className="flex items-center justify-center h-screen">
+          <Image
+            src="/mascotDancing.gif"
+            alt="mascot"
+            width={75}
+            height={100}
+          />
+        </div>
       </div>
     );
   }
