@@ -5,13 +5,44 @@ import Link from "next/link";
 export default function ManagerPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <h1 className="text-3xl font-bold mb-6">Manager Dashboard</h1>
-      {/* Button to navigate to the menu boards page */}
-      <Link href="/manager/menu_boards">
-        <button className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-          Show Menu Boards
-        </button>
-      </Link>
+      {/* Page Title */}
+      <h1 className="text-4xl font-bold mb-8 text-center">
+        Manager Dashboard
+      </h1>
+
+      {/* Button Container */}
+      <div className="flex flex-col w-full max-w-2xl space-y-4 mx-auto">
+        <Link href="/manager/view_orders">
+          <button className="w-full text-4xl text-white bg-pink-600 py-4 rounded hover:bg-pink-700 transition-colors">
+            View Orders
+          </button>
+        </Link>
+        <Link href="/manager/view_sales">
+          <button className="w-full text-4xl text-white bg-pink-600 py-4 rounded hover:bg-pink-700 transition-colors">
+            View Sales
+          </button>
+        </Link>
+        <Link href="/manager/manage_employees">
+          <button className="w-full text-4xl text-white bg-pink-600 py-4 rounded hover:bg-pink-700 transition-colors">
+            Manage Employees
+          </button>
+        </Link>
+        <Link href="/manager/update_inventory">
+          <button className="w-full text-4xl text-white bg-pink-600 py-4 rounded hover:bg-pink-700 transition-colors">
+            Update Inventory
+          </button>
+        </Link>
+        <Link href="/manager/update_menu_items">
+          <button className="w-full text-4xl text-white bg-pink-600 py-4 rounded hover:bg-pink-700 transition-colors">
+            Update Menu Items
+          </button>
+        </Link>
+        <Link href="/manager/menu_boards">
+          <button className="w-full text-4xl text-white bg-pink-600 py-4 rounded hover:bg-pink-700 transition-colors">
+            Display Menu Boards
+          </button>
+        </Link>
+      </div>
     </div>
   );
 }
