@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 interface CustomizationProps {
+  //Info of currently selected menu item, if none selected, make null
   selectedItem: {
     item_id: number;
     item_name: string;
     sell_price: number;
     item_type: string;
   } | null;
+  //customization option for that specific selected info
   customization: {
     ice: string;
     sweetness: string;
@@ -15,6 +17,7 @@ interface CustomizationProps {
     removedIngredients: string[];
     toppings: string[];
   };
+  //function to update the selected option
   setCustomization: React.Dispatch<React.SetStateAction<{
     ice: string;
     sweetness: string;
@@ -27,8 +30,6 @@ interface CustomizationProps {
   ingredients: string[];
 }
 
-
-
 const CustomizationModal: React.FC<CustomizationProps> = ({
   selectedItem,
   customization,
@@ -37,8 +38,7 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
   closeModal,
   ingredients
 }) => {
-
-  return (
+  return ( //html code for customization modal
     <div className="fixed top-0 left-0 w-full h-full bg-[#E5CDC8] bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-4 rounded-lg w-126 max-h-[80vh] overflow-y-auto">
         <h2 className="text-xl font-bold text-accent mb-4 text-center">Customize {selectedItem?.item_name}</h2>
@@ -157,9 +157,11 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
         </div>
 
         <div className="flex justify-between">
+          {/* Close Modal Button */}
           <button onClick={closeModal} className="px-4 py-2 border rounded">
             Cancel
           </button>
+          {/* Add to cart button */}
           <button onClick={addCustomizedItem} className="px-4 py-2 bg-accent text-white rounded">
             Add to Cart
           </button>
