@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface CustomizationProps {
   //Info of currently selected menu item, if none selected, make null
@@ -26,20 +27,8 @@ interface CustomizationProps {
   }>>;
   addCustomizedItem: () => void;
   closeModal: () => void;
+  ingredients: string[];
 }
-//function to get ingredients for selected item (this is used for the removeIngredients customization)
-async function GetIngredients(itemId: number): Promise<string[]> {
-  try {
-    const res = await fetch(`/api/ingredients?item_id=${itemId}`);
-    if (!res.ok) throw new Error('Failed to fetch ingredients');
-    const data = await res.json();
-    return data.ingredients || [];
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
-}
-
 
 const CustomizationModal: React.FC<CustomizationProps> = ({
   selectedItem,
@@ -47,27 +36,16 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
   setCustomization,
   addCustomizedItem,
   closeModal,
+  ingredients
 }) => {
-  const [ingredients, setIngredients] = useState<string[]>([]); //used to store ingredients for specific selcted item
-  //fetch ingredients dynamically (using API) when a new item is selected
-  useEffect(() => {
-    async function fetchIngredients() {
-      if (selectedItem?.item_id) {
-        const fetchedIngredients = await GetIngredients(selectedItem.item_id);
-        setIngredients(fetchedIngredients);
-      }
-    }
-    fetchIngredients();
-  }, [selectedItem]);
-
   return ( //html code for customization modal
     <div className="fixed top-0 left-0 w-full h-full bg-[#E5CDC8] bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-4 rounded-lg w-126 max-h-[80vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4 text-center">Customize {selectedItem?.item_name}</h2>
+        <h2 className="text-xl font-bold text-accent mb-4 text-center">Customize {selectedItem?.item_name}</h2>
 
         {/* Ice Level Option */}
         <div className="mb-4">
-          <label className="block mb-2">Ice Level:</label>
+          <label className="block mb-2 text-accent font-semibold">Ice Level:</label>
           <select
             value={customization.ice}
             onChange={(e) => setCustomization({ ...customization, ice: e.target.value })}
@@ -81,7 +59,7 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
 
         {/* Sweetness Level Option */}
         <div className="mb-4">
-          <label className="block mb-2">Sweetness Level:</label>
+          <label className="block mb-2 text-accent font-semibold">Sweetness Level:</label>
           <select
             value={customization.sweetness}
             onChange={(e) => setCustomization({ ...customization, sweetness: e.target.value })}
@@ -97,7 +75,7 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
 
         {/* Type of Tea Option */}
         <div className="mb-4">
-          <label className="block mb-2">Type of Tea:</label>
+          <label className="block mb-2 text-accent font-semibold">Type of Tea:</label>
           <select
             value={customization.teaType}
             onChange={(e) => setCustomization({ ...customization, teaType: e.target.value })}
@@ -111,7 +89,7 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
 
         {/* Remove Ingredients Option (Dynamically Fetched) */}
         <div className="mb-4">
-          <p className="mb-2">Remove Ingredients:</p>
+          <p className="mb-2 text-accent font-semibold">Remove Ingredients:</p>
           {ingredients.length > 0 ? (
             ingredients.map((ingredient) => (
               <div key={ingredient}>
@@ -147,7 +125,7 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
 
         {/* Toppings Option */}
         <div className="mb-4">
-          <p className="mb-2">Toppings:</p>
+          <p className="mb-2 text-accent font-semibold">Toppings:</p>
           {[
             "aloe vera", "aiyu jelly", "lychee jelly", "herb jelly", "mini pearl",
             "red beans", "creama", "pudding", "ice cream", "crystal boba",
