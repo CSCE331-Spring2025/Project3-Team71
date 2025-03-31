@@ -5,12 +5,15 @@ import { Loader } from 'lucide-react';
 import { useCart } from "@/components/CartContext";
 import CustomizationModal from "@/components/CustomizationModal";
 import Image from 'next/image';
+import { get } from 'http';
 
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [menuCategories, setMenuCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [ingredients, setIngredients] = useState<string[]>([]);
+  const [isLoadingIngredients, setIsLoadingIngredients] = useState(true);
   const [selectedItem, setSelectedItem] = useState<{
     item_id: number;
     item_name: string;
@@ -47,6 +50,19 @@ export default function MenuPage() {
     };
     quantity: number;
   }
+
+  async function GetIngredients(itemId: number): Promise<string[]> {
+    try {
+      const res = await fetch(`/api/ingredients?item_id=${itemId}`);
+      if (!res.ok) throw new Error('Failed to fetch ingredients');
+      const data = await res.json();
+      return data.ingredients || [];
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  }
+
   // Update the cart state to use this type
   const { cart, addToCart, removeFromCart, clearCart } = useCart();
 
@@ -89,6 +105,18 @@ export default function MenuPage() {
     fetchMenuItems();
   }, []);
 
+  useEffect(() => {
+    async function fetchIngredients() {
+      if (selectedItem?.item_id) {
+        setIsLoadingIngredients(true);
+        const fetchedIngredients = await GetIngredients(selectedItem.item_id);
+        setIsLoadingIngredients(false);
+        setIngredients(fetchedIngredients);
+      }
+    }
+    fetchIngredients();
+  }, [selectedItem]);
+
   // Filter menu items by the selected category
   const filteredMenuItems = selectedCategory 
     ? menuItems.filter(item => item.item_type === selectedCategory)
@@ -110,6 +138,10 @@ export default function MenuPage() {
       removedIngredients: [], // This stays as it was
       toppings: [] // Ensure toppings is initialized as an empty array
     });
+    GetIngredients(item.item_id) // Fetch ingredients for the selected item
+      .then((fetchedIngredients) => {
+        setIngredients(fetchedIngredients);
+      })
   };
 
   // Calculate the total cost using the sell_price of each item
@@ -161,7 +193,7 @@ export default function MenuPage() {
 
       {/* Menu Items and Cart Column */}
       <div className="flex-1 pl-4 mb-10">
-        <h2 className="text-2xl text-accent font-bold ml-1 mb-4">{selectedCategory} Menu</h2>
+        {/* <h2 className="text-2xl text-accent font-bold ml-1 mb-4">{selectedCategory} Menu</h2> */}
         <div className="grid grid-cols-3 gap-4">
           {filteredMenuItems.length > 0 ? (
             filteredMenuItems.map((item) => (
@@ -190,13 +222,14 @@ export default function MenuPage() {
       </div>
 
       {/* Customization Modal */}
-      {selectedItem && (
+      {selectedItem && !isLoadingIngredients && (
         <CustomizationModal
           selectedItem={selectedItem}
           customization={customization}
           setCustomization={setCustomization}
           addCustomizedItem={addCustomizedItem}
           closeModal={() => setSelectedItem(null)}
+          ingredients={ingredients}
         />
       )}
     </div>

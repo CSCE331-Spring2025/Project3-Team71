@@ -24,19 +24,10 @@ interface CustomizationProps {
   }>>;
   addCustomizedItem: () => void;
   closeModal: () => void;
+  ingredients: string[];
 }
 
-async function GetIngredients(itemId: number): Promise<string[]> {
-  try {
-    const res = await fetch(`/api/ingredients?item_id=${itemId}`);
-    if (!res.ok) throw new Error('Failed to fetch ingredients');
-    const data = await res.json();
-    return data.ingredients || [];
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
-}
+
 
 const CustomizationModal: React.FC<CustomizationProps> = ({
   selectedItem,
@@ -44,21 +35,8 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
   setCustomization,
   addCustomizedItem,
   closeModal,
+  ingredients
 }) => {
-  const [ingredients, setIngredients] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchIngredients() {
-      if (selectedItem?.item_id) {
-        setIsLoading(true);
-        const fetchedIngredients = await GetIngredients(selectedItem.item_id);
-        setIsLoading(false);
-        setIngredients(fetchedIngredients);
-      }
-    }
-    fetchIngredients();
-  }, [selectedItem]);
 
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-[#E5CDC8] bg-opacity-50 flex items-center justify-center">
@@ -112,17 +90,6 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
         {/* Remove Ingredients Option (Dynamically Fetched) */}
         <div className="mb-4">
           <p className="mb-2 text-accent font-semibold">Remove Ingredients:</p>
-          {isLoading && (
-            <div className="flex flex-col">
-              <Image
-                src="/mascotDancing.gif"
-                alt="mascot"
-                width={75}
-                height={100}
-              />
-            </div>
-
-          )}
           {ingredients.length > 0 ? (
             ingredients.map((ingredient) => (
               <div key={ingredient}>
