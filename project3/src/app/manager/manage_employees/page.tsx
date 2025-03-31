@@ -1,9 +1,7 @@
-import React from 'react'
+import React from 'react';
 
-const page = () => {
+export default function ManageEmployeesPage() {
   return (
-    <div>page</div>
-  )
+    <div>Manage Employees Page</div>
+  );
 }
-
-export default page

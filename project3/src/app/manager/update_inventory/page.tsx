@@ -1,9 +1,7 @@
 import React from 'react'
 
-const page = () => {
-  return (
-    <div>page</div>
-  )
+export default function UpdateInventoryPage() {
+    return (
+        <div>Update Inventory Page</div>
+    )
 }
-
-export default page
