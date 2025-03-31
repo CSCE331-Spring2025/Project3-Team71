@@ -47,12 +47,16 @@ export async function POST(req: NextRequest) {
 
     await client.query('COMMIT');
     return NextResponse.json({ success: true });
-
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Checkout error:', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
-  } finally {
+  
+    // Ensure err is an Error type
+    const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+    
+    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
+  }
+   finally {
     client.release();
   }
 }

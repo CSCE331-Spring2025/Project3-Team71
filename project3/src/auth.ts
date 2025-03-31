@@ -1,11 +1,11 @@
-import NextAuth from "next-auth";
+import NextAuth, {User} from "next-auth";
 import Google from "next-auth/providers/google";
 import pool from "@/lib/db";
 
 export const authOptions = {
   providers: [Google],
   callbacks: {
-    async signIn({ user }) {
+    async signIn({ user }: { user: User }) {
       if (!user?.email) return false; // Ensure email exists
 
       const email = user.email;
