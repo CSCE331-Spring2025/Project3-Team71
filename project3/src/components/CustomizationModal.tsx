@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 
 interface CustomizationProps {
+  //Info of currently selected menu item, if none selected, make null
   selectedItem: {
     item_id: number;
     item_name: string;
     sell_price: number;
     item_type: string;
   } | null;
+  //customization option for that specific selected info
   customization: {
     ice: string;
     sweetness: string;
@@ -14,6 +16,7 @@ interface CustomizationProps {
     removedIngredients: string[];
     toppings: string[];
   };
+  //function to update the selected option
   setCustomization: React.Dispatch<React.SetStateAction<{
     ice: string;
     sweetness: string;
@@ -24,7 +27,7 @@ interface CustomizationProps {
   addCustomizedItem: () => void;
   closeModal: () => void;
 }
-
+//function to get ingredients for selected item (this is used for the removeIngredients customization)
 async function GetIngredients(itemId: number): Promise<string[]> {
   try {
     const res = await fetch(`/api/ingredients?item_id=${itemId}`);
