@@ -40,6 +40,7 @@ async function GetIngredients(itemId: number): Promise<string[]> {
   }
 }
 
+
 const CustomizationModal: React.FC<CustomizationProps> = ({
   selectedItem,
   customization,
@@ -47,8 +48,8 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
   addCustomizedItem,
   closeModal,
 }) => {
-  const [ingredients, setIngredients] = useState<string[]>([]);
-
+  const [ingredients, setIngredients] = useState<string[]>([]); //used to store ingredients for specific selcted item
+  //fetch ingredients dynamically (using API) when a new item is selected
   useEffect(() => {
     async function fetchIngredients() {
       if (selectedItem?.item_id) {
