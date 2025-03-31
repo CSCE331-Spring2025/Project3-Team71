@@ -44,10 +44,10 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
 
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light mt-4 px-4 py-2 flex items-center justify-between relative">
+    <nav className="navbar navbar-expand-lg navbar-light bg-light px-4 flex items-center justify-between fixed top-0 left-0 right-0 z-50 h-16 shadow-md" style={{ backgroundColor: "#E5CDC8" }}>
       <div className="absolute left-4 relative">
         {!session?.user ? (
-          <button className="btn-primary my-2 text-white p-2 rounded bg-blue-500">
+          <button className="btn-primary text-white p-2 rounded bg-blue-500">
             <Link href="/login">Login</Link>
           </button>
         ) : (
@@ -56,8 +56,10 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
             <Image
               src={(session.user?.image || '/default-avatar.png') as string}
               alt={session.user?.name || 'User'}
-              width={35}
+              width={40}
               height={35}
+              className="rounded-full border-2 border-white shadow-md hover:shadow-lg transition-shadow duration-200"
+              title={session.user?.name || 'User'}
             />
             </button>
             {accountModalOpen && (
