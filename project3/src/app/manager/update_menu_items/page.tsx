@@ -101,7 +101,7 @@ export default function ManageMenuItemsPage() {
             onClick={() => setSelectedCategory(cat)}
             className={`px-4 py-2 rounded ${
               selectedCategory === cat
-                ? "bg-blue-600 text-white"
+                ? "bg-accent text-white"
                 : "bg-gray-200 text-gray-800"
             }`}
           >
@@ -131,7 +131,7 @@ export default function ManageMenuItemsPage() {
           <div className="flex justify-center mt-6">
             <button
               onClick={() => openModal()}
-              className="px-6 py-3 bg-white text-black rounded hover:bg-white transition"
+              className="px-6 py-3 bg-accent text-white rounded hover:bg-white transition"
             >
               Add New Item
             </button>
