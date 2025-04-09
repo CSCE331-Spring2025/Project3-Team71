@@ -9,7 +9,7 @@ export default function WeatherWidget() {
   useEffect(() => {
     async function fetchWeather() {
       try {
-        const res = await fetch('/api/weather?city=Doha');
+        const res = await fetch('/api/weather?lat=-96.3396662&long=30.6240713');
         const data = await res.json();
         if (res.ok) {
           setWeather(data.weather);
@@ -29,7 +29,7 @@ export default function WeatherWidget() {
 
   return (
     <div
-      className="fixed bottom-4 right-4 z-50 bg-white bg-opacity-90 backdrop-blur-md border border-gray-300 shadow-lg rounded-xl p-3 text-sm w-64"
+      className="fixed bottom-4 left-4 z-50 bg-white bg-opacity-90 backdrop-blur-md border border-gray-300 shadow-lg rounded-xl p-3 text-sm w-64"
     >
       <h2 className="font-semibold mb-1">Weather in {weather.name}</h2>
       <p>🌡 Temp: {weather.main.temp}°C</p>
