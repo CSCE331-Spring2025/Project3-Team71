@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
-export async function PUT(req: NextRequest, context: { params: { item_id: string } }) {
-  const { item_id } = context.params;
-  const itemId = parseInt(item_id);
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ item_id: string }> }
+) {
+  const { item_id } = await params;
+  const itemId = parseInt(item_id, 10);
+
+  if (isNaN(itemId)) {
+    return NextResponse.json({ error: 'Invalid item ID' }, { status: 400 });
+  }
+
   const { item_name, sell_price, ingredients } = await req.json();
 
   if (!item_name || !sell_price || !Array.isArray(ingredients)) {
@@ -24,9 +32,16 @@ export async function PUT(req: NextRequest, context: { params: { item_id: string
   }
 }
 
-export async function DELETE(req: NextRequest, context: any) {
-  const { params } = await context;
-  const itemId = parseInt(params.item_id);
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ item_id: string }> }
+) {
+  const { item_id } = await params;
+  const itemId = parseInt(item_id, 10);
+
+  if (isNaN(itemId)) {
+    return NextResponse.json({ error: 'Invalid item ID' }, { status: 400 });
+  }
 
   try {
     await pool.query(`DELETE FROM menu_items WHERE item_id = $1`, [itemId]);
@@ -36,5 +51,3 @@ export async function DELETE(req: NextRequest, context: any) {
     return NextResponse.json({ error: 'Failed to delete item' }, { status: 500 });
   }
 }
-
-

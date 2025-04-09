@@ -12,7 +12,7 @@ interface MenuItem {
 }
 
 export default function ManageMenuItemsPage() {
-  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [menuCategories, setMenuCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   type Ingredient = {
@@ -52,14 +52,14 @@ export default function ManageMenuItemsPage() {
         throw new Error('Failed to fetch menu items');
       }
       const data = await res.json();
-      const formatted = data.map((item: any) => ({
+      const formatted: MenuItem[] = data.map((item: any) => ({
         item_id: item.item_id,
         name: item.item_name,
         category: item.item_type,
         price: item.sell_price,
-        ingredients: [], // Will be fetched when editing
-        image: null,     // Default to null
-      }));
+        ingredients: [],
+        image: null,
+      }));      
 
       setMenuItems(formatted);
 

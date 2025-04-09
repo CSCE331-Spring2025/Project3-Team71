@@ -3,16 +3,18 @@ import NavBarClient from "./NavBar.client";
 import pool from "@/lib/db";
 
 const NavBar = async () => {
-  // Get session data on the server side
   const session = await auth();
+  const email = session?.user?.email;
 
-  // if user is a manager by searching in managers table
-  const isManager = session?.user?.email
-  ? (await pool.query(`SELECT * FROM managers WHERE email = $1`, [session.user.email])).rowCount > 0
-  : undefined;
+  // If email is missing, safely return default
+  if (!email) {
+    return <NavBarClient session={session} isManager={false} />;
+  }
 
+  // TypeScript now knows email is definitely a string here
+  const result = await pool.query(`SELECT * FROM managers WHERE email = $1`, [email]);
+  const isManager = (result.rowCount as number) > 0;
 
-  // Pass session data to the client component
   return <NavBarClient session={session} isManager={isManager} />;
 };
 
