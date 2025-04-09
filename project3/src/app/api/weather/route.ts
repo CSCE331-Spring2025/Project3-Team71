@@ -15,6 +15,10 @@ export async function GET(req: NextRequest) {
     const data = await res.json();
     return NextResponse.json({ weather: data });
   } catch (err) {
-    return NextResponse.json({ error: 'Weather API error', detail: err.message }, { status: 500 });
+    if (err instanceof Error) {
+      return NextResponse.json({ error: 'Weather API error', detail: err.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
+  
 }
