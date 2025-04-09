@@ -1,9 +1,9 @@
 "use client";
-
-import { useState, ChangeEvent } from "react";
+import Image from "next/image";
+import { useState, ChangeEvent, useEffect } from "react";
 
 interface MenuItem {
-  id: number;
+  item_id: number;
   name: string;
   category: string;
   price: number;
@@ -12,21 +12,17 @@ interface MenuItem {
 }
 
 export default function ManageMenuItemsPage() {
-  // Hardcoded sample data (extended with ingredients; image is null)
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([
-    { id: 1, name: "Classic Milk Tea", category: "Milk Tea", price: 4.5, ingredients: ["Tea", "Milk"], image: null },
-    { id: 5, name: "Honey Milk Tea", category: "Milk Tea", price: 5.0, ingredients: ["Tea", "Honey"], image: null },
-    { id: 6, name: "Matcha Milk Tea", category: "Milk Tea", price: 5.25, ingredients: ["Tea", "Milk"], image: null },
-    { id: 2, name: "Matcha Latte", category: "Fresh Milk", price: 5.25, ingredients: ["Milk", "Matcha"], image: null },
-    { id: 7, name: "Vanilla Fresh Milk", category: "Fresh Milk", price: 5.0, ingredients: ["Milk", "Vanilla"], image: null },
-    { id: 3, name: "Peach Mojito", category: "Mojitos", price: 4.5, ingredients: ["Peach", "Mint"], image: null },
-    { id: 8, name: "Strawberry Mojito", category: "Mojitos", price: 4.75, ingredients: ["Strawberry", "Mint"], image: null },
-    { id: 4, name: "Berry Fruit Tea", category: "Fruit Tea", price: 4.75, ingredients: ["Berries", "Tea"], image: null },
-    { id: 9, name: "Mango Fruit Tea", category: "Fruit Tea", price: 4.5, ingredients: ["Mango", "Tea"], image: null },
-  ]);
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [menuCategories, setMenuCategories] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  type Ingredient = {
+    ingredient_id: number;
+    name: string;
+  };
+  const [availableIngredients, setAvailableIngredients] = useState<Ingredient[]>([]);
+  const [ingredients, setIngredients] = useState<number[]>([]);
+  
 
-  // Define a list of available ingredients for checkboxes
-  const availableIngredients = ["Tea", "Milk", "Honey", "Tapioca Pearls", "Sugar"];
 
   // Derive the list of categories
   const categories = Array.from(new Set(menuItems.map((item) => item.category)));
@@ -35,76 +31,147 @@ export default function ManageMenuItemsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
-  const [modalName, setModalName] = useState("");
-  const [modalPrice, setModalPrice] = useState<number>(0);
-  const [modalIngredients, setModalIngredients] = useState<string[]>([]);
-  const [modalImage, setModalImage] = useState<File | null>(null);
+  const [modalName, setItemName] = useState("");
+  const [modalPrice, setItemPrice] = useState<number>(0);
+  const [modalImage, setItemImage] = useState<File | null>(null);
+
+  useEffect(() => {
+    console.log('Available Ingredients:', availableIngredients);
+  }, [availableIngredients]);
+
+  useEffect(() => {
+    fetchMenuItems();
+  }, []); 
+
+  
+  async function fetchMenuItems() {
+    try {
+      setIsLoading(true);
+      const res = await fetch('/api/menu');
+      if (!res.ok) {
+        throw new Error('Failed to fetch menu items');
+      }
+      const data = await res.json();
+      const formatted = data.map((item: any) => ({
+        item_id: item.item_id,
+        name: item.item_name,
+        category: item.item_type,
+        price: item.sell_price,
+        ingredients: [], // Will be fetched when editing
+        image: null,     // Default to null
+      }));
+
+      setMenuItems(formatted);
+
+      const categories = [...new Set(formatted.map((item) => item.category))];
+
+      
+      setMenuCategories(categories);
+      if (categories.length > 0) {
+        setSelectedCategory(categories[0]);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
+      setIsLoading(false);
+    }
+  }
+
+  async function GetIngredients(itemId: number): Promise<Ingredient[]> {
+    try {
+      const res = await fetch(`/api/ingredients?item_id=${itemId}`);
+      if (!res.ok) throw new Error('Failed to fetch ingredients');
+      const data = await res.json();
+      return data.ingredients || []; // Assume ingredients = [{ ingredient_id, name }]
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  }
+  
 
   // Handle ingredient checkbox toggle
-  const handleIngredientChange = (ingredient: string) => {
-    setModalIngredients((prev) =>
-      prev.includes(ingredient)
-        ? prev.filter((ing) => ing !== ingredient)
-        : [...prev, ingredient]
+  const handleIngredientChange = (item_id: number) => {
+    setIngredients((prev) =>
+      prev.includes(item_id)
+        ? prev.filter((ingId) => ingId !== item_id)
+        : [...prev, item_id]
     );
   };
+  
 
   // Handle file upload changes
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setModalImage(e.target.files[0]);
+      setItemImage(e.target.files[0]);
     }
   };
 
   // Open modal for adding or editing an item
-  const openModal = (item?: MenuItem) => {
+  const openModal = async (item?: MenuItem) => {
     if (item) {
       setSelectedItem(item);
-      setModalName(item.name);
-      setModalPrice(item.price);
-      setModalIngredients(item.ingredients || []);
-      setModalImage(item.image || null);
+      setItemName(item.name);
+      setItemPrice(item.price);
+      setItemImage(item.image || null);
+  
+      const selected = await GetIngredients(item.item_id);
+      const all = await GetIngredients(0);
+  
+      setAvailableIngredients(all);
+      setIngredients(selected.map(ing => ing.ingredient_id));
+      setIsModalOpen(true);
     } else {
-      // New item defaults
+      const all = await GetIngredients(0);
+      setAvailableIngredients(all);
+      setIngredients([]);
       setSelectedItem(null);
-      setModalName("");
-      setModalPrice(0);
-      setModalIngredients([]);
-      setModalImage(null);
+      setItemName("");
+      setItemPrice(0);
+      setItemImage(null);
+      setIsModalOpen(true);
     }
-    setIsModalOpen(true);
   };
+  
+  
+  
 
   // Save the item (update existing or add new)
-  const saveItem = () => {
+  const saveItem = async () => {
     if (selectedItem) {
-      // Update existing item
-      setMenuItems((prevItems) =>
-        prevItems.map((item) =>
-          item.id === selectedItem.id
-            ? {
-                ...item,
-                name: modalName,
-                price: modalPrice,
-                ingredients: modalIngredients,
-                image: modalImage,
-              }
-            : item
-        )
-      );
-    } else {
-      // Add new item, generate new ID
-      const newId =
-        menuItems.length > 0 ? Math.max(...menuItems.map((item) => item.id)) + 1 : 1;
-      const newItem: MenuItem = {
-        id: newId,
-        name: modalName,
-        category: selectedCategory || "Uncategorized",
-        price: modalPrice,
-        ingredients: modalIngredients,
-        image: modalImage,
-      };
-      setMenuItems((prevItems) => [...prevItems, newItem]);
+      // call update API
+      const res = await fetch(`/api/menu/${selectedItem.item_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          item_name: modalName,
+          sell_price: modalPrice,
+          ingredients,
+        }),
+      });
+    }
+    else{
+      // call add API
+      const res = await fetch("/api/menu", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          item_name: modalName,
+          item_type: selectedCategory,
+          sell_price: modalPrice,
+          ingredients,
+        }),
+      });
+      if (res.ok) {
+        // refetch menu items
+        fetchMenuItems();
+      } else {
+        console.error("Failed to add item:", await res.json());
+      }
     }
     setIsModalOpen(false);
   };
@@ -112,10 +179,20 @@ export default function ManageMenuItemsPage() {
   // Delete an existing item
   const deleteItem = () => {
     if (selectedItem) {
-      setMenuItems((prevItems) =>
-        prevItems.filter((item) => item.id !== selectedItem.id)
-      );
-      setIsModalOpen(false);
+      fetch(`/api/menu/${selectedItem.item_id}`, {
+        method: "DELETE",
+      })
+        .then((res) => {
+          if (res.ok) {
+            setMenuItems((prev) =>
+              prev.filter((item) => item.item_id !== selectedItem.item_id)
+            );
+            setIsModalOpen(false);
+          } else {
+            console.error("Failed to delete item:", res.statusText);
+          }
+        })
+        .catch((err) => console.error("Error deleting item:", err));
     }
   };
 
@@ -127,7 +204,23 @@ export default function ManageMenuItemsPage() {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6 text-center">Manage Menu Items</h1>
-
+      {isLoading && (
+        <div className="flex justify-center items-center h-screen">
+          <p className="text-lg">Loading...</p>
+          <div className="flex items-center justify-center h-screen">
+            <Image
+              src="/mascotDancing.gif"
+              alt="mascot"
+              width={75}
+              height={100}
+            />
+          </div>
+        </div>
+      )}
+      
+      {!isLoading && menuItems.length === 0 && (
+        <p className="text-center">No menu items available.</p>
+      )}
       {/* Category Selection */}
       <div className="flex justify-center space-x-4 mb-6">
         {categories.map((cat) => (
@@ -154,7 +247,7 @@ export default function ManageMenuItemsPage() {
           <div className="grid grid-cols-3 gap-4">
             {filteredItems.map((item) => (
               <div
-                key={item.id}
+                key={item.item_id}
                 className="bg-white border rounded p-4 flex flex-col items-center cursor-pointer hover:shadow-lg"
                 onClick={() => openModal(item)}
               >
@@ -177,7 +270,7 @@ export default function ManageMenuItemsPage() {
       {/* Modal for Adding/Editing an Item */}
       {isModalOpen && (
         <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white rounded p-6 w-96">
+          <div className="bg-white rounded p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">
               {selectedItem ? "Edit Item" : "Add New Item"}
             </h2>
@@ -186,7 +279,7 @@ export default function ManageMenuItemsPage() {
               <input
                 type="text"
                 value={modalName}
-                onChange={(e) => setModalName(e.target.value)}
+                onChange={(e) => setItemName(e.target.value)}
                 className="w-full border p-2 rounded"
               />
             </div>
@@ -195,9 +288,8 @@ export default function ManageMenuItemsPage() {
               <input
                 type="number"
                 value={modalPrice}
-                onChange={(e) =>
-                  setModalPrice(parseFloat(e.target.value))
-                }
+                min="0"
+                onChange={(e) => setItemPrice(parseFloat(e.target.value) || 0)}
                 className="w-full border p-2 rounded"
               />
             </div>
@@ -207,21 +299,17 @@ export default function ManageMenuItemsPage() {
                 Ingredients
               </label>
               <div className="flex flex-wrap gap-2">
-                {availableIngredients.map((ingredient) => (
-                  <div
-                    key={ingredient}
-                    className="flex items-center space-x-1"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={modalIngredients.includes(ingredient)}
-                      onChange={() =>
-                        handleIngredientChange(ingredient)
-                      }
-                    />
-                    <span>{ingredient}</span>
-                  </div>
-                ))}
+              {availableIngredients.map((ingredient) => (
+                <div key={ingredient.ingredient_id} className="flex items-center space-x-1">
+                  <input
+                    type="checkbox"
+                    checked={ingredients.includes(ingredient.ingredient_id)}
+                    onChange={() => handleIngredientChange(ingredient.ingredient_id)}
+                  />
+                  <span>{ingredient.name}</span>
+                </div>
+              ))}
+
               </div>
             </div>
             {/* Image Upload */}
