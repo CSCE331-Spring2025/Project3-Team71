@@ -1,48 +1,42 @@
-"use client";
+"use server";
+import ManagerPage from "./ManagerPage";
+import { auth } from "@/auth";
+import pool from "@/lib/db";
+import { redirect } from "next/navigation";
 
-import Link from "next/link";
+export default async function ManagerPageWrapper() {
+  const session = await auth();
 
-export default function ManagerPage() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
-      {/* Page Title */}
-      <h1 className="text-4xl font-bold mb-8 text-center">
-        Manager Dashboard
-      </h1>
+  // redirect to home screen if not logged in
+  if (!session) {
+    redirect("/");
+  }
 
-      {/* Button Container */}
-      <div className="flex flex-col w-full max-w-2xl space-y-4 mx-auto">
-        <Link href="/manager/view_orders">
-          <button className="w-full text-4xl text-white bg-accent py-4 rounded hover:bg-pink-900 transition-colors">
-            View Orders
-          </button>
-        </Link>
-        <Link href="/manager/view_sales">
-          <button className="w-full text-4xl text-white bg-accent py-4 rounded hover:bg-pink-900 transition-colors">
-            View Sales
-          </button>
-        </Link>
-        <Link href="/manager/manage_employees">
-          <button className="w-full text-4xl text-white bg-accent py-4 rounded hover:bg-pink-900 transition-colors">
-            Manage Employees
-          </button>
-        </Link>
-        <Link href="/manager/update_inventory">
-          <button className="w-full text-4xl text-white bg-accent py-4 rounded hover:bg-pink-900 transition-colors">
-            Update Inventory
-          </button>
-        </Link>
-        <Link href="/manager/update_menu_items">
-          <button className="w-full text-4xl text-white bg-accent py-4 rounded hover:bg-pink-900 transition-colors">
-            Update Menu Items
-          </button>
-        </Link>
-        <Link href="/manager/menu_boards">
-          <button className="w-full text-4xl text-white bg-accent py-4 rounded hover:bg-pink-900 transition-colors">
-            Display Menu Boards
-          </button>
-        </Link>
-      </div>
-    </div>
-  );
+  const email = session?.user?.email;
+  const name = session?.user?.name || "Unknown";
+  const now = new Date();
+
+  if (email) {
+    try {
+      const { rows } = await pool.query(`SELECT * FROM managers WHERE email = $1`, [email]);
+
+      if (rows.length === 0) {
+        await pool.query(
+          `INSERT INTO managers (name, email, last_sign_in) VALUES ($1, $2, $3)`,
+          [name, email, now]
+        );
+        console.log("Inserted new manager");
+      } else {
+        await pool.query(
+          `UPDATE managers SET last_sign_in = $1 WHERE email = $2`,
+          [now, email]
+        );
+        console.log("Updated manager login");
+      }
+    } catch (error) {
+      console.error("Manager DB error:", error);
+    }
+  }
+
+  return <ManagerPage />;
 }

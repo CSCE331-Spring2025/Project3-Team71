@@ -3,15 +3,38 @@ import pool from '@/lib/db';
 
 export async function GET(request: Request) {
   try {
-    // Extract item_id from query parameters
     const { searchParams } = new URL(request.url);
-    const itemId = searchParams.get('item_id');
+    const itemIdParam = searchParams.get('item_id');
 
-    if (!itemId) {
+    if (!itemIdParam) {
       return NextResponse.json({ error: 'Missing item_id parameter' }, { status: 400 });
     }
 
-    // Fetch ingredient IDs from the menu_items table
+    const itemId = parseInt(itemIdParam, 10);
+    if (isNaN(itemId)) {
+      return NextResponse.json({ error: 'Invalid item_id' }, { status: 400 });
+    }
+
+    // Ingredients to exclude from response
+    const EXCLUDED = ['Cups', 'Straws', 'Plastic Bags', 'Ice', 'Napkins'];
+
+    if (itemId === 0) {
+      const allIngredientsQuery = `
+        SELECT ingredient_id, ingredient_name 
+        FROM ingredients
+        WHERE ingredient_name NOT IN (${EXCLUDED.map((_, i) => `$${i + 1}`).join(',')})
+      `;
+      const allIngredientsResult = await pool.query(allIngredientsQuery, EXCLUDED);
+
+      const allIngredients = allIngredientsResult.rows.map(row => ({
+        ingredient_id: row.ingredient_id,
+        name: row.ingredient_name,
+      }));
+
+      return NextResponse.json({ ingredients: allIngredients }, { status: 200 });
+    }
+
+    // For a specific menu item
     const menuQuery = `SELECT ingredients FROM menu_items WHERE item_id = $1`;
     const menuResult = await pool.query(menuQuery, [itemId]);
 
@@ -25,19 +48,23 @@ export async function GET(request: Request) {
       return NextResponse.json({ ingredients: [] }, { status: 200 });
     }
 
-    // Fetch ingredient names based on ingredient IDs
-    const ingredientQuery = `SELECT ingredient_name FROM ingredients WHERE ingredient_id = ANY($1)`;
-    const ingredientResult = await pool.query(ingredientQuery, [ingredientIds]);
-
-    // Map the result to get the ingredient names
-    const ingredientNames = ingredientResult.rows.map(row => row.ingredient_name);
-
-    // Filter out unwanted ingredients (Cup, Straw, Plastic Bag, Ice)
-    const filteredIngredients = ingredientNames.filter(name => 
-      !['Cups', 'Straws', 'Plastic Bags', 'Ice'].includes(name)
+    const ingredientQuery = `
+      SELECT ingredient_id, ingredient_name 
+      FROM ingredients 
+      WHERE ingredient_id = ANY($1)
+      AND ingredient_name NOT IN (${EXCLUDED.map((_, i) => `$${i + 2}`).join(',')})
+    `;
+    const ingredientResult = await pool.query(
+      ingredientQuery,
+      [ingredientIds, ...EXCLUDED]
     );
 
-    return NextResponse.json({ ingredients: filteredIngredients }, { status: 200 });
+    const selectedIngredients = ingredientResult.rows.map(row => ({
+      ingredient_id: row.ingredient_id,
+      name: row.ingredient_name,
+    }));
+
+    return NextResponse.json({ ingredients: selectedIngredients }, { status: 200 });
   } catch (error) {
     console.error('Database error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
