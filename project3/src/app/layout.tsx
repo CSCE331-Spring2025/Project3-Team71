@@ -4,6 +4,7 @@ import "./globals.css";
 import NavBar from "@/components/NavBar.server";
 import { CartProvider } from "@/components/CartContext";
 import GoogleTranslate from "@/components/GoogleTranslate/GoogleTranslate"; // new component
+import WeatherWidget from "@/components/WeatherWidget"; 
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,9 +29,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CartProvider>
           <NavBar />
           <GoogleTranslate />
+          <WeatherWidget /> 
           {children}
         </CartProvider>
       </body>
     </html>
   );
 }
+
