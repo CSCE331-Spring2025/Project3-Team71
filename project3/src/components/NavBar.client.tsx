@@ -10,9 +10,10 @@ import Logout from '@/components/Logout';
 
 interface NavBarClientProps {
   session: Session | null;
+  isManager?: boolean;
 }
 
-const NavBarClient = ({ session }: NavBarClientProps) => {
+const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
   const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
@@ -72,7 +73,10 @@ const NavBarClient = ({ session }: NavBarClientProps) => {
                     />
                     
                     <div className="relative flex flex-col bg-white p-6 items-center rounded-lg w-80 shadow-lg z-10">
-                        <h2 className="text-xl font-bold mb-4">Welcome {session.user?.name}</h2>
+                        <h2 className="text-xl font-bold mb-4">{`Welcome ${session.user?.name.split(' ')[0]}`}</h2>
+                        {isManager && (
+                          <Link href="/manager" className="text-blue-500 hover:underline mb-2">Manager Dashboard</Link>
+                        )}
                         <Logout />
                     </div>
                 </div>
