@@ -27,7 +27,7 @@ interface CustomizationProps {
   }>>;
   addCustomizedItem: () => void;
   closeModal: () => void;
-  ingredients: string[];
+  ingredients: { ingredient_id: number; name: string }[];
 }
 
 const CustomizationModal: React.FC<CustomizationProps> = ({
@@ -38,6 +38,7 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
   closeModal,
   ingredients
 }) => {
+  console.log('ingredients:', ingredients); // Debugging line
   return ( //html code for customization modal
     <div className="fixed top-0 left-0 w-full h-full bg-[#E5CDC8] bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-4 rounded-lg w-126 max-h-[80vh] overflow-y-auto">
@@ -92,29 +93,29 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
           <p className="mb-2 text-accent font-semibold">Remove Ingredients:</p>
           {ingredients.length > 0 ? (
             ingredients.map((ingredient) => (
-              <div key={ingredient}>
+              <div key={ingredient.ingredient_id}>
                 <label>
                   <input
                     type="checkbox"
-                    checked={customization.removedIngredients.includes(ingredient)}
+                    checked={customization.removedIngredients.includes(ingredient.name)}
                     onChange={(e) => {
                       if (e.target.checked) {
                         setCustomization({
                           ...customization,
-                          removedIngredients: [...customization.removedIngredients, ingredient],
+                          removedIngredients: [...customization.removedIngredients, ingredient.name],
                         });
                       } else {
                         setCustomization({
                           ...customization,
                           removedIngredients: customization.removedIngredients.filter(
-                            (ing) => ing !== ingredient
+                            (ing) => ing !== ingredient.name
                           ),
                         });
                       }
                     }}
                     className="mr-2"
                   />
-                  {ingredient}
+                  {ingredient.name}
                 </label>
               </div>
             ))
@@ -122,6 +123,8 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
             <p>No ingredients available for customization.</p>
           )}
         </div>
+
+
 
         {/* Toppings Option */}
         <div className="mb-4">

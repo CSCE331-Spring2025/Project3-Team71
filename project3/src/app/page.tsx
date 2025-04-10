@@ -12,14 +12,14 @@ export default function MenuPage() {
   const [menuCategories, setMenuCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [ingredients, setIngredients] = useState<string[]>([]);
+  const [ingredients, setIngredients] = useState<{ ingredient_id: number; name: string }[]>([]);
   const [isLoadingIngredients, setIsLoadingIngredients] = useState(true);
   const [selectedItem, setSelectedItem] = useState<{
     item_id: number;
     item_name: string;
     sell_price: number;
     item_type: string;
-    ingredients?: string[];
+    ingredients: { ingredient_id: number; name: string }[];
   } | null>(null);
   // Default customization: regular ice, sweetness: normal, teaType: greenTea, toppings: none, and no ingredients removed.
   const [customization, setCustomization] = useState<{
@@ -40,7 +40,10 @@ export default function MenuPage() {
     item_name?: string;
     sell_price?: number;
     item_type?: string;
-    ingredients?: string[];
+    ingredients: {
+      ingredient_id: number;
+      name: string;
+    }[];
     customization: {
       ice: string;
       sweetness: string;
@@ -51,7 +54,7 @@ export default function MenuPage() {
     quantity: number;
   }
 
-  async function GetIngredients(itemId: number): Promise<string[]> {
+  async function GetIngredients(itemId: number): Promise<{ ingredient_id: number; name: string }[]> {
     try {
       const res = await fetch(`/api/ingredients?item_id=${itemId}`);
       if (!res.ok) throw new Error('Failed to fetch ingredients');
@@ -62,6 +65,7 @@ export default function MenuPage() {
       return [];
     }
   }
+  
 
   // Update the cart state to use this type
   const { cart, addToCart, removeFromCart, clearCart } = useCart();
@@ -128,9 +132,13 @@ export default function MenuPage() {
     item_name: string;
     sell_price: number;
     item_type: string;
-    ingredients?: string[];
+    ingredients?: { ingredient_id: number; name: string }[];
   }) => {
-    setSelectedItem(item);
+    setSelectedItem({
+      ...item,
+      ingredients: item.ingredients ?? []
+    });
+    
     setCustomization({
       ice: "Medium", 
       sweetness: "Normal",  // Add default sweetness

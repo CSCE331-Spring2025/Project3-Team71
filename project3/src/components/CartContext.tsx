@@ -15,7 +15,10 @@ export interface CartItem {
   item_name?: string;
   sell_price?: number;
   item_type?: string;
-  ingredients?: string[];
+  ingredients: {
+    ingredient_id: number;
+    name: string;
+  }[];
   customization: Customization;
   quantity: number;
 }

@@ -7,7 +7,10 @@ interface MenuItem {
   name: string;
   category: string;
   price: number;
-  ingredients: string[];
+  ingredients: {
+    ingredient_id: number;
+    name: string;
+  }[];
   image?: File | null;
 }
 
