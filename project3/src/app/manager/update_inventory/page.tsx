@@ -16,35 +16,18 @@ export default function UpdateInventoryPage() {
   const [loading, setLoading] = useState(true);
   const [activePopup, setActivePopup] = useState<number | null>(null);
   const [inputValue, setInputValue] = useState("");
+  const [editingMin, setEditingMin] = useState<number | null>(null);
+  const [newMinValue, setNewMinValue] = useState("");
   const [filter, setFilter] = useState<"all" | "below" | "near">("all");
   const [showThresholds, setShowThresholds] = useState(false);
-  const [nearThreshold, setNearThreshold] = useState(1.25); // 25% above min
-  const [approachingThreshold, setApproachingThreshold] = useState(1.5); // 50% above min
+  const [nearThreshold, setNearThreshold] = useState(1.25);
+  const [approachingThreshold, setApproachingThreshold] = useState(1.5);
 
-  const STATUS_STYLES: Record<
-    string,
-    { bg: string; text: string; border: string }
-  > = {
-    red: {
-      bg: "bg-red-100",
-      text: "text-red-800",
-      border: "border-red-500",
-    },
-    orange: {
-      bg: "bg-orange-100",
-      text: "text-orange-800",
-      border: "border-orange-500",
-    },
-    yellow: {
-      bg: "bg-yellow-100",
-      text: "text-yellow-800",
-      border: "border-yellow-500",
-    },
-    green: {
-      bg: "bg-green-100",
-      text: "text-green-800",
-      border: "border-green-500",
-    },
+  const STATUS_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+    red: { bg: "bg-red-100", text: "text-red-800", border: "border-red-500" },
+    orange: { bg: "bg-orange-100", text: "text-orange-800", border: "border-orange-500" },
+    yellow: { bg: "bg-yellow-100", text: "text-yellow-800", border: "border-yellow-500" },
+    green: { bg: "bg-green-100", text: "text-green-800", border: "border-green-500" },
   };
 
   useEffect(() => {
@@ -68,10 +51,8 @@ export default function UpdateInventoryPage() {
     const min = item.min_amount;
 
     if (q < min) return { color: "red", label: "Below Minimum" };
-    if (q < min * nearThreshold)
-      return { color: "orange", label: "Near Minimum" };
-    if (q < min * approachingThreshold)
-      return { color: "yellow", label: "Approaching Minimum" };
+    if (q < min * nearThreshold) return { color: "orange", label: "Near Minimum" };
+    if (q < min * approachingThreshold) return { color: "yellow", label: "Approaching Minimum" };
     return { color: "green", label: "Stock Healthy" };
   };
 
@@ -89,23 +70,42 @@ export default function UpdateInventoryPage() {
       });
 
       setInventory((prev) =>
-        prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: newQuantity } : i
-        )
+        prev.map((i) => (i.id === item.id ? { ...i, quantity: newQuantity } : i))
       );
 
       setActivePopup(null);
       setInputValue("");
     } catch (error) {
-      console.error("Failed to update inventory:", error);
+      console.error("Failed to update inventory quantity:", error);
+    }
+  };
+
+  const handleUpdateMin = async (item: InventoryItem) => {
+    const newMin = parseInt(newMinValue, 10);
+    if (isNaN(newMin) || newMin <= 0) return;
+
+    try {
+      await fetch(`/api/inventory/${item.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ min_amount: newMin }),
+      });
+
+      setInventory((prev) =>
+        prev.map((i) => (i.id === item.id ? { ...i, min_amount: newMin } : i))
+      );
+
+      setEditingMin(null);
+      setNewMinValue("");
+    } catch (error) {
+      console.error("Failed to update minimum amount:", error);
     }
   };
 
   const filteredInventory = inventory.filter((item) => {
     const status = getStockStatus(item);
     if (filter === "below") return status.color === "red";
-    if (filter === "near")
-      return status.color === "orange" || status.color === "yellow";
+    if (filter === "near") return status.color === "orange" || status.color === "yellow";
     return true;
   });
 
@@ -121,7 +121,7 @@ export default function UpdateInventoryPage() {
     <div className="p-6 min-h-screen bg-gray-50">
       <h1 className="text-3xl font-bold text-center mb-6">Update Inventory</h1>
 
-      {/* Toggle Thresholds Button */}
+      {/* Toggle Threshold Settings */}
       <div className="mb-4 text-right max-w-4xl mx-auto">
         <button
           onClick={() => setShowThresholds(!showThresholds)}
@@ -131,7 +131,6 @@ export default function UpdateInventoryPage() {
         </button>
       </div>
 
-      {/* Threshold Inputs (shown when toggled) */}
       {showThresholds && (
         <div className="flex flex-wrap gap-4 items-center justify-end max-w-4xl mx-auto mb-4">
           <div>
@@ -155,9 +154,7 @@ export default function UpdateInventoryPage() {
               step="0.05"
               className="border px-2 py-1 w-20 rounded"
               value={approachingThreshold}
-              onChange={(e) =>
-                setApproachingThreshold(parseFloat(e.target.value))
-              }
+              onChange={(e) => setApproachingThreshold(parseFloat(e.target.value))}
             />
           </div>
         </div>
@@ -180,7 +177,7 @@ export default function UpdateInventoryPage() {
         </select>
       </div>
 
-      {/* Inventory Cards */}
+      {/* Inventory Items */}
       <div className="grid gap-4 max-w-4xl mx-auto">
         {filteredInventory.map((item) => {
           const status = getStockStatus(item);
@@ -197,12 +194,51 @@ export default function UpdateInventoryPage() {
                   <p className="text-sm text-gray-600">
                     Cost: ${item.cost.toFixed(2)}
                   </p>
-                  <p className="text-sm text-gray-600">
-                    Min Required: {item.min_amount}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Items Sold: {item.items_sold}
-                  </p>
+
+                  {/* Editable Min Amount */}
+                  <div className="text-sm text-gray-600 flex items-center gap-2 mt-1">
+                    <span>Min Required:</span>
+                    {editingMin === item.id ? (
+                      <>
+                        <input
+                          type="number"
+                          value={newMinValue}
+                          onChange={(e) => setNewMinValue(e.target.value)}
+                          className="w-16 border px-1 py-0.5 rounded text-sm"
+                        />
+                        <button
+                          onClick={() => handleUpdateMin(item)}
+                          className="text-green-600 hover:underline text-sm"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingMin(null);
+                            setNewMinValue("");
+                          }}
+                          className="text-gray-400 hover:text-gray-600 text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <span>{item.min_amount}</span>
+                        <button
+                          onClick={() => {
+                            setEditingMin(item.id);
+                            setNewMinValue(item.min_amount.toString());
+                          }}
+                          className="text-blue-500 hover:underline text-sm"
+                        >
+                          Edit
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  <p className="text-sm text-gray-600">Items Sold: {item.items_sold}</p>
                   <p className="text-sm text-gray-800 mt-2 font-medium">
                     Current Stock: {item.quantity}
                   </p>
