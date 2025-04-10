@@ -14,6 +14,8 @@ export default function MenuPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [ingredients, setIngredients] = useState<{ ingredient_id: number; name: string }[]>([]);
   const [isLoadingIngredients, setIsLoadingIngredients] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+
   const [selectedItem, setSelectedItem] = useState<{
     item_id: number;
     item_name: string;
@@ -91,7 +93,6 @@ export default function MenuPage() {
           throw new Error('Failed to fetch menu items');
         }
         const data = await res.json();
-        console.log('Menu Items:', data);
         setMenuItems(data);
 
         // Extract unique categories from item_type property
@@ -127,30 +128,37 @@ export default function MenuPage() {
     : [];
 
   // Open the customization modal for the clicked item
-  const openCustomization = (item: {
+  const openCustomization = async (item: {
     item_id: number;
     item_name: string;
     sell_price: number;
     item_type: string;
     ingredients?: { ingredient_id: number; name: string }[];
   }) => {
+    setIsLoadingIngredients(true);
+    setShowModal(false); // hide modal while loading
+  
+    const fetchedIngredients = await GetIngredients(item.item_id);
+    setIngredients(fetchedIngredients);
+  
     setSelectedItem({
       ...item,
-      ingredients: item.ingredients ?? []
+      ingredients: fetchedIngredients
     });
-    
+  
     setCustomization({
-      ice: "Medium", 
-      sweetness: "Normal",  // Add default sweetness
-      teaType: "Green tea", // Add default teaType
-      removedIngredients: [], // This stays as it was
-      toppings: [] // Ensure toppings is initialized as an empty array
+      ice: "Medium",
+      sweetness: "Normal",
+      teaType: "Green tea",
+      removedIngredients: [],
+      toppings: []
     });
-    GetIngredients(item.item_id) // Fetch ingredients for the selected item
-      .then((fetchedIngredients) => {
-        setIngredients(fetchedIngredients);
-      })
+  
+    setIsLoadingIngredients(false);
+    setShowModal(true); // now we’re ready to show the modal
   };
+  
+  
 
   // Calculate the total cost using the sell_price of each item
   const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
@@ -230,16 +238,20 @@ export default function MenuPage() {
       </div>
 
       {/* Customization Modal */}
-      {selectedItem && !isLoadingIngredients && (
+      {showModal && selectedItem && (
         <CustomizationModal
           selectedItem={selectedItem}
           customization={customization}
           setCustomization={setCustomization}
           addCustomizedItem={addCustomizedItem}
-          closeModal={() => setSelectedItem(null)}
+          closeModal={() => {
+            setShowModal(false);
+            setSelectedItem(null);
+          }}
           ingredients={ingredients}
         />
       )}
+
     </div>
   );
 }
