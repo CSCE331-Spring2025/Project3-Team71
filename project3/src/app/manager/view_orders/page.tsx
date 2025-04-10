@@ -5,7 +5,7 @@ import { useState } from "react";
 interface Order {
   id: number;
   order_date: string; // or Date, depending on your schema
-  items?: { item_name: string }[];
+  items?: { item_id: number }[];
   total?: number;
   // Add other fields as needed
 }
@@ -29,7 +29,7 @@ export default function ViewOrdersPage() {
       if (endDate) queryParams.append("endDate", endDate);
 
       // Example endpoint: /api/orders
-      const response = await fetch(`/api/orders?${queryParams.toString()}`);
+      const response = await fetch(`/api/viewOrders?${queryParams.toString()}`);
       if (!response.ok) {
         throw new Error("Failed to fetch orders");
       }
@@ -102,7 +102,7 @@ export default function ViewOrdersPage() {
                   </td>
                   <td className="py-2 px-4">
                     {order.items
-                      ? order.items.map((item) => item.item_name).join(", ")
+                      ? order.items.map((item) => item.item_id).join(", ")
                       : "No items"}
                   </td>
                   <td className="py-2 px-4">{order.total?.toFixed(2) || "0.00"}</td>
