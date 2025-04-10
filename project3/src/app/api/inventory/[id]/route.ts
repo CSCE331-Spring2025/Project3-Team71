@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import Pool from '@/lib/db';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
-  const id = parseInt(params.id, 10);
-  if (isNaN(id)) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const parsedId = parseInt(id, 10);
+  if (isNaN(parsedId)) {
     return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
   }
 

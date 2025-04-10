@@ -1,15 +1,20 @@
-import { NextResponse } from 'next/server';
-import Pool from '@/lib/db';
+import { NextRequest, NextResponse } from 'next/server';
+import pool from '@/lib/db';
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
-  const id = parseInt(params.id);
+export async function DELETE(
+  req: NextRequest,
+  {params} : { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const parsedId = parseInt(id, 10);
 
-  if (isNaN(id)) {
+
+  if (isNaN(parsedId)) {
     return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
   }
 
   try {
-    await Pool.query('DELETE FROM employees WHERE employee_id = $1', [id]);
+    await pool.query('DELETE FROM employees WHERE employee_id = $1', [id]);
     return NextResponse.json({ message: 'Employee deleted' });
   } catch (error) {
     console.error('Error deleting employee:', error);
