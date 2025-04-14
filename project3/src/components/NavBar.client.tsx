@@ -17,6 +17,7 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
   const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [note, setNote] = useState("");
   const [showCelebration, setShowCelebration] = useState(false);
 
 
@@ -220,7 +221,10 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg w-[90%] max-w-xl shadow-xl relative">
               <button
-                onClick={() => setCheckoutModalOpen(false)}
+                onClick={() => {
+                  setCheckoutModalOpen(false);
+                  setNote("");
+                }}
                 className="absolute top-2 right-3 text-gray-500 hover:text-black text-xl"
               >
                 ×
@@ -290,6 +294,20 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
                 ))}
               </ul>
 
+              <div className="mb-4">
+                <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-1">
+                  Add a note (optional)
+                </label>
+                <textarea
+                  id="note"
+                  rows={3}
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
+                  placeholder="e.g. Less sugar, extra napkins..."
+                />
+              </div>
+
               <div className="font-bold text-right mb-4">
                 Total: $
                 {cart.reduce((sum, item) => sum + item.quantity * (item.sell_price || 0), 0).toFixed(2)}
@@ -308,6 +326,7 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
                         menuItemId: item.item_id,
                         quantity: item.quantity,
                       })),
+                      note: note.trim(),
                     }),
                   });
                 
@@ -322,6 +341,7 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
                 
                     // alert("Order placed!");
                     clearCart();
+                    setNote("");
                     setCheckoutModalOpen(false);
                   } else {
                     alert("Checkout failed: " + data.error);
@@ -341,6 +361,7 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
             onClick={() => {
               setCheckoutModalOpen(false);
               setCartModalOpen(true);
+              setNote("");
             }}
             className="w-full border border-blue-500 text-blue-500 py-2 rounded hover:bg-blue-50"
           >
