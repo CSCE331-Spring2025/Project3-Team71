@@ -1,48 +1,58 @@
 "use client";
 
 import Link from "next/link";
+import { LayoutDashboard, ReceiptText, Users, Package, Utensils, Monitor } from "lucide-react";
+
+const managerOptions = [
+  {
+    title: "View Orders",
+    icon: <ReceiptText size={32} />,
+    href: "/manager/view_orders",
+  },
+  {
+    title: "View Sales",
+    icon: <LayoutDashboard size={32} />,
+    href: "/manager/view_sales",
+  },
+  {
+    title: "Manage Employees",
+    icon: <Users size={32} />,
+    href: "/manager/manage_employees",
+  },
+  {
+    title: "Update Inventory",
+    icon: <Package size={32} />,
+    href: "/manager/update_inventory",
+  },
+  {
+    title: "Update Menu Items",
+    icon: <Utensils size={32} />,
+    href: "/manager/update_menu_items",
+  },
+  {
+    title: "Display Menu Boards",
+    icon: <Monitor size={32} />,
+    href: "/manager/menu_boards",
+  },
+];
 
 export default function ManagerPage() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
-      {/* Page Title */}
-      <h1 className="text-4xl font-bold mb-8 text-center">
-        Manager Dashboard
-      </h1>
+    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+      <div className="flex flex-col items-center w-full max-w-6xl">
 
-      {/* Button Container */}
-      <div className="flex flex-col w-full max-w-2xl space-y-4 mx-auto">
-        <Link href="/manager/view_orders">
-          <button className="w-full text-4xl text-white bg-accent py-4 rounded hover:bg-pink-900 transition-colors">
-            View Orders
-          </button>
-        </Link>
-        <Link href="/manager/view_sales">
-          <button className="w-full text-4xl text-white bg-accent py-4 rounded hover:bg-pink-900 transition-colors">
-            View Sales
-          </button>
-        </Link>
-        <Link href="/manager/manage_employees">
-          <button className="w-full text-4xl text-white bg-accent py-4 rounded hover:bg-pink-900 transition-colors">
-            Manage Employees
-          </button>
-        </Link>
-        <Link href="/manager/update_inventory">
-          <button className="w-full text-4xl text-white bg-accent py-4 rounded hover:bg-pink-900 transition-colors">
-            Update Inventory
-          </button>
-        </Link>
-        <Link href="/manager/update_menu_items">
-          <button className="w-full text-4xl text-white bg-accent py-4 rounded hover:bg-pink-900 transition-colors">
-            Update Menu Items
-          </button>
-        </Link>
-        <Link href="/manager/menu_boards">
-          <button className="w-full text-4xl text-white bg-accent py-4 rounded hover:bg-pink-900 transition-colors">
-            Display Menu Boards
-          </button>
-        </Link>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+          {managerOptions.map(({ title, icon, href }) => (
+            <Link key={title} href={href}>
+              <div className="flex flex-col items-center justify-center bg-accent text-white rounded-xl p-6 cursor-pointer transition hover:scale-105 hover:bg-pink-900">
+                {icon}
+                <span className="mt-4 text-lg font-semibold text-center">{title}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
+
