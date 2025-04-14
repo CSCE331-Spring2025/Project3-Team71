@@ -26,7 +26,7 @@ export default function ViewSalesPage() {
       if (endDate) queryParams.append("endDate", endDate);
 
       // Call the API to get product usage data
-      const response = await fetch(`/api/viewSales?${queryParams.toString()}`);
+      const response = await fetch(`/api/viewSales/productUsage?${queryParams.toString()}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch product usage');
