@@ -34,13 +34,18 @@ export default function ViewSalesPage() {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
 
   const fetchProductUsage = async () => {
+    if (!startDate || !endDate) {
+      setError("Must enter start and end date for Product Usage");
+      return;
+    }
+  
     setIsLoading(true);
     setError(null);
     try {
       const queryParams = new URLSearchParams();
-      if (startDate) queryParams.append("startDate", startDate);
-      if (endDate) queryParams.append("endDate", endDate);
-
+      queryParams.append("startDate", startDate);
+      queryParams.append("endDate", endDate);
+  
       const response = await fetch(`/api/viewSales/productUsage?${queryParams.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch product usage');
       const data = await response.json();
@@ -55,13 +60,18 @@ export default function ViewSalesPage() {
   };
 
   const fetchSalesReport = async () => {
+    if (!startDate || !endDate) {
+      setError("Must enter start and end date for Sales Report");
+      return;
+    }
+  
     setIsLoading(true);
     setError(null);
     try {
       const queryParams = new URLSearchParams();
-      if (startDate) queryParams.append("startDate", startDate);
-      if (endDate) queryParams.append("endDate", endDate);
-
+      queryParams.append("startDate", startDate);
+      queryParams.append("endDate", endDate);
+  
       const response = await fetch(`/api/viewSales/salesReport?${queryParams.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch sales report');
       const data = await response.json();
@@ -100,6 +110,12 @@ export default function ViewSalesPage() {
   };
 
   const handleDatePickerClose = (date: string) => {
+    if (!date) {
+      setError("Must select a date for X Report");
+      setIsDatePickerOpen(false);
+      return;
+    }
+  
     setSelectedDate(date);
     setIsDatePickerOpen(false);
     fetchXReport(date); // Fetch the X report data after selecting the date
@@ -132,28 +148,28 @@ export default function ViewSalesPage() {
 
         <button
           onClick={fetchProductUsage}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="btn-primary"
         >
           Product Usage
         </button>
 
         <button
           onClick={fetchSalesReport}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          className="btn-primary"
         >
           Sales Report
         </button>
 
         <button
           onClick={() => setIsDatePickerOpen(true)}
-          className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+          className="btn-primary"
         >
           X Report
         </button>
       </div>
 
       {isDatePickerOpen && (
-        <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center z-10">
+        <div className="fixed top-0 left-0 right-0 bottom-0 bg-background bg-opacity-50 flex justify-center items-center z-10">
           <div className="bg-white p-4 rounded shadow-lg">
             <h3 className="text-lg font-semibold mb-4">Select Date for X Report</h3>
             <input
@@ -165,7 +181,7 @@ export default function ViewSalesPage() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setIsDatePickerOpen(false)}
-                className="bg-gray-400 text-white px-4 py-2 rounded"
+                className="btn-primary"
               >
                 Cancel
               </button>
