@@ -10,24 +10,25 @@ declare global {
 
 const GoogleTranslate: React.FC = () => {
     useEffect(() => {
-        const addGoogleTranslateScript = () => {
-            const script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-            script.async = true;
-            document.body.appendChild(script);
-        };
-
+        if (document.getElementById("google-translate-script")) return;
+      
+        const script = document.createElement('script');
+        script.id = "google-translate-script";
+        script.type = 'text/javascript';
+        script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+        script.async = true;
+        document.body.appendChild(script);
+      
         window.googleTranslateElementInit = () => {
+          if (!document.getElementById('google_translate_element')?.innerHTML.trim()) {
             new window.google.translate.TranslateElement(
-                { pageLanguage: 'en' },
-                'google_translate_element'
+              { pageLanguage: 'en' },
+              'google_translate_element'
             );
+          }
         };
-
-        addGoogleTranslateScript();
-
-    }, []);
+      }, []);
+      
 
     return (
         <>

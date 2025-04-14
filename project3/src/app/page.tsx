@@ -6,6 +6,8 @@ import { useCart } from "@/components/CartContext";
 import CustomizationModal from "@/components/CustomizationModal";
 import Image from 'next/image';
 import { get } from 'http';
+import GoogleTranslate from "@/components/GoogleTranslate/GoogleTranslate";
+import WeatherWidget from "@/components/WeatherWidget";
 
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<any[]>([]);
@@ -188,6 +190,10 @@ export default function MenuPage() {
 
   return (
     <div className="flex mx-4 mt-10 mb-10 space-x-4 pt-16">
+      <div>
+        <WeatherWidget />
+        <GoogleTranslate />
+      </div>
       {/* Categories Column */}
       <div className="w-64 pr-4 border-r">
         <div className="flex flex-col space-y-2">
