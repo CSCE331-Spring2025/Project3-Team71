@@ -19,7 +19,9 @@ export default function MenuPage() {
   const [isLoadingIngredients, setIsLoadingIngredients] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [accessibilityModalOpen, setAccessibilityModalOpen] = useState(false);
-  const [fontScale, setFontScale] = useState(1); // 1 = 100%
+  const [fontScale, setFontScale] = useState(1);
+  const [highContrast, setHighContrast] = useState(false);
+
 
 
   const [selectedItem, setSelectedItem] = useState<{
@@ -193,9 +195,17 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="flex mx-4 mt-10 mb-10 space-x-4 pt-16" style={{ fontSize: `${fontScale}rem` }}>
+      <div
+          className={`flex mx-4 mt-10 mb-10 space-x-4 pt-16 ${
+            highContrast ? 'bg-black text-yellow-300' : ''
+          }`}
+          style={{ fontSize: `${fontScale}rem` }}
+        >
         <WeatherWidget />
-        <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end">
+        <div className={`fixed bottom-4 right-4 z-40 flex flex-col items-end 
+        ${
+            highContrast ? 'bg-black text-yellow-300' : ''
+          }`}>
           {/* Modal */}
           <div
             className={`relative mb-2 max-w-xs w-72 transition-all duration-300 ${
@@ -206,30 +216,47 @@ export default function MenuPage() {
             <div className="absolute bottom-0 right-6 translate-y-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
 
             {/* Modal Content */}
-            <div className="bg-white p-4 rounded shadow-lg text-center">
+            <div className={`p-4 rounded shadow-lg text-center ${highContrast ? 'bg-black text-yellow-300' : 'bg-white '}`}>
               <h3 className="font-bold text-lg mb-2">Accessibility Options</h3>
-               {/* Font Size Controls */}
-                <p className="text-sm mb-2">Font Size:</p>
-                <div className="flex items-center space-x-2 mb-3 items-center justify-center mb-5">
-                  <button
-                    onClick={() => setFontScale(prev => Math.max(0.75, prev - 0.1))}
-                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                  >
-                    A-
-                  </button>
-                  <button
-                    onClick={() => setFontScale(1)}
-                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                  >
-                    A
-                  </button>
-                  <button
-                    onClick={() => setFontScale(prev => Math.min(2, prev + 0.1))}
-                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                  >
-                    A+
-                  </button>
-                </div>
+
+              {/* Font Size Controls */}
+              <p className="text-sm mb-2">Font Size:</p>
+              <div className="flex items-center space-x-2 mb-5 justify-center">
+                <button
+                  onClick={() => setFontScale(prev => Math.max(0.75, prev - 0.1))}
+                  className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                >
+                  A-
+                </button>
+                <button
+                  onClick={() => setFontScale(1)}
+                  className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                >
+                  A
+                </button>
+                <button
+                  onClick={() => setFontScale(prev => Math.min(2, prev + 0.1))}
+                  className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                >
+                  A+
+                </button>
+              </div>
+
+              {/* High Contrast Toggle */}
+              <div className="mb-5">
+                <p className="text-sm mb-1">High Contrast:</p>
+                <button
+                  onClick={() => setHighContrast(prev => !prev)}
+                  className={`px-3 py-1 rounded font-semibold ${
+                    highContrast
+                      ? 'bg-yellow-300 text-black hover:bg-yellow-200'
+                      : 'bg-gray-200 text-black hover:bg-gray-300'
+                  }`}
+                >
+                  {highContrast ? 'Disable' : 'Enable'}
+                </button>
+              </div>
+
               <p className="text-sm mb-2">Translate:</p>
               <GoogleTranslate />
             </div>
@@ -248,7 +275,7 @@ export default function MenuPage() {
 
       {/* Categories Column */}
       <div className="w-64 pr-4 border-r">
-        <div className="flex flex-col space-y-2">
+        <div className="lex flex-col space-y-2">
           {menuCategories.map((category) => (
             <button 
               key={category} 
@@ -257,7 +284,9 @@ export default function MenuPage() {
                 selectedCategory === category 
                   ? 'bg-accent font-bold text-white' 
                   : 'bg-primary font-bold text-accent hover:bg-primary border border-primary border-2'
-              }`}
+                  
+              }
+              ${highContrast ? 'bg-black text-yellow-300' : ''}`}
             >
               {category}
             </button>
@@ -273,7 +302,9 @@ export default function MenuPage() {
             filteredMenuItems.map((item) => (
               <div 
                 key={item.item_id} 
-                className="bg-white border border-3 border-primary p-4 rounded-lg shadow-md cursor-pointer"
+                className={`border border-3 border-primary p-4 rounded-lg shadow-md cursor-pointer ${
+                  highContrast ? 'bg-black text-yellow-300' : 'bg-white'
+                }`}
                 onClick={() => openCustomization(item)}
               >
                 {/* Display the image corresponding to the item_id */}
@@ -285,7 +316,13 @@ export default function MenuPage() {
                 />
                 </div>
 
-                <h3 className="font-bold text-accent text-lg">{item.item_name}</h3>
+                <h3 className={`font-bold ${
+                    highContrast ? 'bg-black text-yellow-300' : 'text-accent'
+                  }`}
+                  style={{ fontSize: `${fontScale}rem` }}
+                >
+                  {item.item_name}
+                </h3>
                 <p className="text-text">${item.sell_price.toFixed(2)}</p>
               </div>
             ))
@@ -307,6 +344,7 @@ export default function MenuPage() {
             setSelectedItem(null);
           }}
           ingredients={ingredients}
+          highContrast={highContrast}
         />
       )}
 
