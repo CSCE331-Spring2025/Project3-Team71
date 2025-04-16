@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { get } from 'http';
 import GoogleTranslate from "@/components/GoogleTranslate/GoogleTranslate";
 import WeatherWidget from "@/components/WeatherWidget";
+import { Accessibility } from 'lucide-react';
 
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<any[]>([]);
@@ -17,6 +18,7 @@ export default function MenuPage() {
   const [ingredients, setIngredients] = useState<{ ingredient_id: number; name: string }[]>([]);
   const [isLoadingIngredients, setIsLoadingIngredients] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [accessibilityModalOpen, setAccessibilityModalOpen] = useState(false);
 
   const [selectedItem, setSelectedItem] = useState<{
     item_id: number;
@@ -190,10 +192,35 @@ export default function MenuPage() {
 
   return (
     <div className="flex mx-4 mt-10 mb-10 space-x-4 pt-16">
-      <div>
         <WeatherWidget />
-        <GoogleTranslate />
-      </div>
+        <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end">
+          {/* Modal */}
+          <div
+            className={`relative mb-2 max-w-xs w-72 transition-all duration-300 ${
+              accessibilityModalOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
+            }`}
+          >
+            {/* Triangle Arrow */}
+            <div className="absolute bottom-0 right-6 translate-y-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
+
+            {/* Modal Content */}
+            <div className="bg-white p-4 rounded shadow-lg">
+              <h3 className="font-bold text-lg mb-2">Accessibility Options</h3>
+              <GoogleTranslate />
+            </div>
+          </div>
+
+          {/* Button */}
+          <button
+            className="bg-accent text-white font-bold p-2 rounded-full border-accent"
+            onClick={() => setAccessibilityModalOpen(!accessibilityModalOpen)}
+          >
+            <Accessibility size={32} />
+          </button>
+        </div>
+
+
+
       {/* Categories Column */}
       <div className="w-64 pr-4 border-r">
         <div className="flex flex-col space-y-2">
