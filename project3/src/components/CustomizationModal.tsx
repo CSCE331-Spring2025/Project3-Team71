@@ -32,6 +32,7 @@ interface CustomizationProps {
   addCustomizedItem: () => void;
   closeModal: () => void;
   ingredients: { ingredient_id: number; name: string }[];
+  highContrast?: boolean;
 }
 
 const CustomizationModal: React.FC<CustomizationProps> = ({
@@ -40,14 +41,18 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
   setCustomization,
   addCustomizedItem,
   closeModal,
-  ingredients
+  ingredients,
+  highContrast
 }) => {
   // Local state to switch between "customize" and "nutrition" views.
   const [view, setView] = useState<"customize" | "nutrition">("customize");
 
   // Render the main customization view.
   const renderCustomizationView = () => (
-    <div>
+    <div className={`p-4
+    ${
+            highContrast ? 'bg-black text-yellow-300' : ''
+          }`}>
       <h2 className="text-xl font-bold text-accent mb-4 text-center">
         Customize {selectedItem?.item_name}
       </h2>
@@ -197,7 +202,9 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
 
   // Render the nutrition/allergy info view.
   const renderNutritionView = () => (
-    <div>
+    <div className={`p-4 ${
+      highContrast ? 'bg-black text-yellow-300' : ''
+    }`}>
       <h2 className="text-xl font-bold text-accent mb-4 text-center">
         Nutrition & Allergy Info for {selectedItem?.item_name}
       </h2>
@@ -223,8 +230,14 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
   );
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-[#E5CDC8] bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-4 rounded-lg w-126 max-h-[80vh] overflow-y-auto">
+    <div className={`fixed top-0 left-0 w-full h-full bg-[#E5CDC8] bg-opacity-50 flex items-center justify-center z-50
+    ${
+            highContrast ? 'bg-black text-yellow-300' : ''
+          }`}>
+      <div className={`bg-white p-4 rounded-lg w-126 max-h-[80vh] overflow-y-auto
+      ${
+            highContrast ? 'bg-black text-yellow-300' : ''
+          }`}>
         {view === "customize" ? renderCustomizationView() : renderNutritionView()}
         <div className="mt-4 text-center">
           <button onClick={closeModal} className="px-4 py-2 border rounded">
