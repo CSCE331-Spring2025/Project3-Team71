@@ -19,6 +19,8 @@ export default function MenuPage() {
   const [isLoadingIngredients, setIsLoadingIngredients] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [accessibilityModalOpen, setAccessibilityModalOpen] = useState(false);
+  const [fontScale, setFontScale] = useState(1); // 1 = 100%
+
 
   const [selectedItem, setSelectedItem] = useState<{
     item_id: number;
@@ -191,7 +193,7 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="flex mx-4 mt-10 mb-10 space-x-4 pt-16">
+    <div className="flex mx-4 mt-10 mb-10 space-x-4 pt-16" style={{ fontSize: `${fontScale}rem` }}>
         <WeatherWidget />
         <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end">
           {/* Modal */}
@@ -204,8 +206,31 @@ export default function MenuPage() {
             <div className="absolute bottom-0 right-6 translate-y-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
 
             {/* Modal Content */}
-            <div className="bg-white p-4 rounded shadow-lg">
+            <div className="bg-white p-4 rounded shadow-lg text-center">
               <h3 className="font-bold text-lg mb-2">Accessibility Options</h3>
+               {/* Font Size Controls */}
+                <p className="text-sm mb-2">Font Size:</p>
+                <div className="flex items-center space-x-2 mb-3 items-center justify-center mb-5">
+                  <button
+                    onClick={() => setFontScale(prev => Math.max(0.75, prev - 0.1))}
+                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                  >
+                    A-
+                  </button>
+                  <button
+                    onClick={() => setFontScale(1)}
+                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                  >
+                    A
+                  </button>
+                  <button
+                    onClick={() => setFontScale(prev => Math.min(2, prev + 0.1))}
+                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                  >
+                    A+
+                  </button>
+                </div>
+              <p className="text-sm mb-2">Translate:</p>
               <GoogleTranslate />
             </div>
           </div>
