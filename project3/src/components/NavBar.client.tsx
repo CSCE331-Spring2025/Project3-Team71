@@ -221,7 +221,7 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
           </div>
       </div>
       {checkoutModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-[#E5CDC8] bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg w-[90%] max-w-xl shadow-xl relative">
               <button
                 onClick={() => {
