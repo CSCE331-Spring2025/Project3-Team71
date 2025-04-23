@@ -8,25 +8,23 @@ export async function POST(req: NextRequest) {
   try {
     await client.query('BEGIN');
 
-    let orderItems: string[] = [];
+    let orderItemIds: number[] = [];
     let orderTotal = 0;
-
+    
     for (const { menuItemId, quantity } of items) {
-      // Get menu item info
       const itemRes = await client.query(
-        `SELECT item_name, sell_price, ingredients FROM menu_items WHERE item_id = $1`,
+        `SELECT sell_price, ingredients FROM menu_items WHERE item_id = $1`,
         [menuItemId]
       );
-
       const item = itemRes.rows[0];
-      const itemName = item.item_name;
       const price = item.sell_price;
       const ingredientIds: number[] = item.ingredients;
-
-      orderItems.push(`${itemName} x${quantity}`);
+    
+      for (let i = 0; i < quantity; i++) {
+        orderItemIds.push(menuItemId);
+      }
       orderTotal += price * quantity;
-
-      // Update each ingredient
+    
       for (const id of ingredientIds) {
         await client.query(
           `UPDATE ingredients
@@ -37,14 +35,14 @@ export async function POST(req: NextRequest) {
         );
       }
     }
-
+    
     // Insert into orders table
     await client.query(
       `INSERT INTO orders (items, order_cost, note, order_date)
        VALUES ($1, $2, $3, NOW())`,
-      [orderItems, orderTotal, note || null]
-    );
-    
+      [orderItemIds, orderTotal, note || null]
+    );    
+
 
     await client.query('COMMIT');
     return NextResponse.json({ success: true });
@@ -61,3 +59,5 @@ export async function POST(req: NextRequest) {
     client.release();
   }
 }
+
+
