@@ -226,22 +226,25 @@ export default function MenuPage() {
 
   return (
       <div
-          className={`flex mx-4 mt-10 mb-10 space-x-4 pt-16 ${
-            highContrast ? 'bg-black text-yellow-300' : ''
-          }`}
-          style={{ fontSize: `${fontScale}rem` }}
-        >
+        className={`flex mx-4 mt-10 mb-10 space-x-4 pt-16 ${
+          highContrast ? 'bg-black text-yellow-300' : ''
+        }`}
+        style={{ fontSize: `${fontScale}rem` }}
+      >
         <WeatherWidget />
-        <div className={`fixed bottom-4 right-4 z-40 flex flex-col items-end 
-        ${
-            highContrast ? 'bg-black text-yellow-300' : ''
-          }`}>
+        + <div
+   className={`fixed bottom-2 right-2 flex flex-col items-end z-50
+     ${highContrast ? 'bg-black text-yellow-300' : ''}`}
+ >
           {/* Modal */}
           <div
-            className={`relative mb-2 max-w-xs w-72 transition-all duration-300 ${
-              accessibilityModalOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
-            }`}
-          >
+   className={`relative mb-1 w-40 p-2 text-sm transition-all duration-300 ${
+       accessibilityModalOpen
+         ? 'opacity-100 scale-100 pointer-events-auto z-50'
+         : 'opacity-0 scale-90 pointer-events-none z-[-1]'
+     }`}
+>
+
             {/* Triangle Arrow */}
             <div className="absolute bottom-0 right-6 translate-y-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
 
@@ -294,9 +297,10 @@ export default function MenuPage() {
 
           {/* Button */}
           <button
-            className="bg-accent text-white font-bold p-2 rounded-full border-accent"
-            onClick={() => setAccessibilityModalOpen(!accessibilityModalOpen)}
-          >
+   className="bg-accent text-white font-bold p-2 rounded-full border-accent
+              pointer-events-auto"
+    onClick={() => setAccessibilityModalOpen(!accessibilityModalOpen)}
+  >
             <Accessibility size={32} />
           </button>
         </div>
@@ -332,7 +336,7 @@ export default function MenuPage() {
             filteredMenuItems.map((item) => (
               <div 
                 key={item.item_id} 
-                className={`border border-3 border-primary p-4 rounded-lg shadow-md cursor-pointer ${
+                className={`border z-10 border-3 border-primary p-4 rounded-lg shadow-md cursor-pointer ${
                   highContrast ? 'bg-black text-yellow-300' : 'bg-white'
                 }`}
                 onClick={() => openCustomization(item)}
