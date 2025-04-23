@@ -16,6 +16,8 @@ export default function MenuPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [ingredients, setIngredients] = useState<{ ingredient_id: number; name: string }[]>([]);
+  const [isLoadingNutrition, setIsLoadingNutrition] = useState(true);
+  const [nutritionData, setNutritionData] = useState<any>(null);
   const [isLoadingIngredients, setIsLoadingIngredients] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [accessibilityModalOpen, setAccessibilityModalOpen] = useState(false);
@@ -75,6 +77,18 @@ export default function MenuPage() {
       return [];
     }
   }
+
+  async function GetNutrition(itemId: number): Promise<any> {
+    try {
+      const res = await fetch(`/api/nutrition/${itemId}`);
+      if (!res.ok) throw new Error('Failed to fetch nutrition data');
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
   
 
   // Update the cart state to use this type
@@ -130,6 +144,18 @@ export default function MenuPage() {
     fetchIngredients();
   }, [selectedItem]);
 
+  useEffect(() => {
+    async function fetchNutrition() {
+      if (selectedItem?.item_id) {
+        setIsLoadingNutrition(true);
+        const fetchedNutrition = await GetNutrition(selectedItem.item_id);
+        setNutritionData(fetchedNutrition);
+        setIsLoadingNutrition(false);
+      }
+    }
+    fetchNutrition();
+  }, [selectedItem]);
+
   // Filter menu items by the selected category
   const filteredMenuItems = selectedCategory 
     ? menuItems.filter(item => item.item_type === selectedCategory)
@@ -142,12 +168,16 @@ export default function MenuPage() {
     sell_price: number;
     item_type: string;
     ingredients?: { ingredient_id: number; name: string }[];
+    nutrition?: any;
   }) => {
     setIsLoadingIngredients(true);
     setShowModal(false); // hide modal while loading
   
     const fetchedIngredients = await GetIngredients(item.item_id);
     setIngredients(fetchedIngredients);
+
+    const fetchedNutrition = await GetNutrition(item.item_id);
+    setNutritionData(fetchedNutrition);
   
     setSelectedItem({
       ...item,
@@ -163,7 +193,7 @@ export default function MenuPage() {
     });
   
     setIsLoadingIngredients(false);
-    setShowModal(true); // now we’re ready to show the modal
+    setShowModal(true);
   };
   
   
@@ -344,6 +374,7 @@ export default function MenuPage() {
             setSelectedItem(null);
           }}
           ingredients={ingredients}
+          nutritionData={nutritionData}
           highContrast={highContrast}
         />
       )}

@@ -33,6 +33,16 @@ interface CustomizationProps {
   closeModal: () => void;
   ingredients: { ingredient_id: number; name: string }[];
   highContrast?: boolean;
+  nutritionData?: {
+    kcal: number;
+    saturated_fat_g: number;
+    sodium_mg: number;
+    carbs_g: number;
+    sugar_g: number;
+    vegetarian_foods: string;
+    allergen: string;
+    caffeine_mg: number;
+  };
 }
 
 const CustomizationModal: React.FC<CustomizationProps> = ({
@@ -42,6 +52,7 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
   addCustomizedItem,
   closeModal,
   ingredients,
+  nutritionData,
   highContrast
 }) => {
   // Local state to switch between "customize" and "nutrition" views.
@@ -209,14 +220,14 @@ const CustomizationModal: React.FC<CustomizationProps> = ({
         Nutrition & Allergy Info for {selectedItem?.item_name}
       </h2>
       <ul className="space-y-2">
-        <li><strong>Calories:</strong> {selectedItem?.kcal ?? "N/A"} Kcal</li>
-        <li><strong>Saturated Fat:</strong> {selectedItem?.saturated_fat_g ?? "N/A"} g</li>
-        <li><strong>Sodium:</strong> {selectedItem?.sodium_mg ?? "N/A"} mg</li>
-        <li><strong>Carbohydrates:</strong> {selectedItem?.carbs_g ?? "N/A"} g</li>
-        <li><strong>Sugar:</strong> {selectedItem?.sugar_g ?? "N/A"} g</li>
-        <li><strong>Vegetarian Options:</strong> {selectedItem?.vegetarian_foods ?? "N/A"}</li>
-        <li><strong>Allergens:</strong> {selectedItem?.allergen || "None"}</li>
-        <li><strong>Caffeine:</strong> {selectedItem?.caffeine_mg ?? "N/A"} mg</li>
+        <li><strong>Calories:</strong> {nutritionData?.kcal ?? "N/A"} Kcal</li>
+        <li><strong>Saturated Fat:</strong> {nutritionData?.saturated_fat_g ?? "N/A"} g</li>
+        <li><strong>Sodium:</strong> {nutritionData?.sodium_mg ?? "N/A"} mg</li>
+        <li><strong>Carbohydrates:</strong> {nutritionData?.carbs_g ?? "N/A"} g</li>
+        <li><strong>Sugar:</strong> {nutritionData?.sugar_g ?? "N/A"} g</li>
+        <li><strong>Vegetarian Options:</strong> {nutritionData?.vegetarian_foods ?? "N/A"}</li>
+        <li><strong>Allergens:</strong> {nutritionData?.allergen || "None"}</li>
+        <li><strong>Caffeine:</strong> {nutritionData?.caffeine_mg ?? "N/A"} mg</li>
       </ul>
       <div className="mt-6 flex justify-center">
         <button
