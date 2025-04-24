@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
+// GET: Fetch all menu items including happy hour pricing
 export async function GET() {
   try {
-    const query = `SELECT item_id, item_name, item_type, sell_price FROM menu_items`;
+    const query = `
+      SELECT item_id, item_name, item_type, sell_price, happy_hour_price 
+      FROM menu_items
+    `;
     const result = await pool.query(query);
     
     return NextResponse.json(result.rows, { status: 200 });
@@ -13,6 +17,7 @@ export async function GET() {
   }
 }
 
+// POST: Add a new menu item
 export async function POST(req: Request) {
   const { item_name, item_type, sell_price, ingredients } = await req.json();
 
@@ -21,7 +26,10 @@ export async function POST(req: Request) {
   }
 
   try {
-    const query = `INSERT INTO menu_items (item_name, item_type, sell_price, ingredients) VALUES ($1, $2, $3, $4)`;
+    const query = `
+      INSERT INTO menu_items (item_name, item_type, sell_price, ingredients) 
+      VALUES ($1, $2, $3, $4)
+    `;
     await pool.query(query, [item_name, item_type, sell_price, ingredients]);
 
     return NextResponse.json({ message: 'Item added successfully' }, { status: 201 });

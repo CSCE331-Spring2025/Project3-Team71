@@ -1,16 +1,17 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Loader } from 'lucide-react';
+import Image from 'next/image';
+import { Accessibility, Loader } from 'lucide-react';
 import { useCart } from "@/components/CartContext";
 import CustomizationModal from "@/components/CustomizationModal";
-import Image from 'next/image';
-import { get } from 'http';
 import GoogleTranslate from "@/components/GoogleTranslate/GoogleTranslate";
 import WeatherWidget from "@/components/WeatherWidget";
-import { Accessibility } from 'lucide-react';
+import { useHappyHourStatus } from "@/hooks/useHappyHourStatus";
 
 export default function MenuPage() {
+  const isHappyHour = useHappyHourStatus();
+
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [menuCategories, setMenuCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -24,108 +25,60 @@ export default function MenuPage() {
   const [fontScale, setFontScale] = useState(1);
   const [highContrast, setHighContrast] = useState(false);
 
-
-
   const [selectedItem, setSelectedItem] = useState<{
     item_id: number;
     item_name: string;
     sell_price: number;
+    happy_hour_price: number;
     item_type: string;
     ingredients: { ingredient_id: number; name: string }[];
   } | null>(null);
-  // Default customization: regular ice, sweetness: normal, teaType: greenTea, toppings: none, and no ingredients removed.
-  const [customization, setCustomization] = useState<{
-    ice: string;
-    sweetness: string;
-    teaType: string;
-    removedIngredients: string[];
-    toppings: string[];
-  }>({
+
+  const [customization, setCustomization] = useState({
     ice: "Regular",
     sweetness: "Normal",
     teaType: "Green tea",
     removedIngredients: [],
     toppings: []
   });
-  interface CartItem {
-    item_id?: number;
-    item_name?: string;
-    sell_price?: number;
-    item_type?: string;
-    ingredients: {
-      ingredient_id: number;
-      name: string;
-    }[];
-    customization: {
-      ice: string;
-      sweetness: string;
-      teaType: string;
-      removedIngredients: string[];
-      toppings: string[];
-    };
-    quantity: number;
-  }
 
-  async function GetIngredients(itemId: number): Promise<{ ingredient_id: number; name: string }[]> {
-    try {
-      const res = await fetch(`/api/ingredients?item_id=${itemId}`);
-      if (!res.ok) throw new Error('Failed to fetch ingredients');
-      const data = await res.json();
-      return data.ingredients || [];
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
-  }
-
-  async function GetNutrition(itemId: number): Promise<any> {
-    try {
-      const res = await fetch(`/api/nutrition/${itemId}`);
-      if (!res.ok) throw new Error('Failed to fetch nutrition data');
-      const data = await res.json();
-      return data;
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
-  }
-  
-
-  // Update the cart state to use this type
   const { cart, addToCart, removeFromCart, clearCart } = useCart();
 
-  // The addCustomizedItem function can now be typed correctly
   const addCustomizedItem = () => {
     if (selectedItem) {
-      const customizedItem: CartItem = { 
-        ...selectedItem, 
-        customization, 
-        quantity: 1
-      };
+      const customizedItem = { ...selectedItem, customization, quantity: 1 };
       addToCart(customizedItem);
       setSelectedItem(null);
     }
   };
 
+  async function GetIngredients(itemId: number) {
+    const res = await fetch(`/api/ingredients?item_id=${itemId}`);
+    const data = await res.json();
+    return data.ingredients || [];
+  }
+
+  async function GetNutrition(itemId: number) {
+    const res = await fetch(`/api/nutrition/${itemId}`);
+    const data = await res.json();
+    return data;
+  }
+
   useEffect(() => {
     async function fetchMenuItems() {
       try {
         const res = await fetch('/api/menu');
-        if (!res.ok) {
-          throw new Error('Failed to fetch menu items');
-        }
         const data = await res.json();
         setMenuItems(data);
 
-        // Extract unique categories from item_type property
-        const categories = [...new Set(data.map((item: { item_type: string }) => item.item_type))] as string[];
+        const categories = [...new Set(data.map((item: any) => item.item_type))];
         setMenuCategories(categories);
         if (categories.length > 0) {
           setSelectedCategory(categories[0]);
         }
         setIsLoading(false);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
         setIsLoading(false);
       }
     }
@@ -137,8 +90,8 @@ export default function MenuPage() {
       if (selectedItem?.item_id) {
         setIsLoadingIngredients(true);
         const fetchedIngredients = await GetIngredients(selectedItem.item_id);
-        setIsLoadingIngredients(false);
         setIngredients(fetchedIngredients);
+        setIsLoadingIngredients(false);
       }
     }
     fetchIngredients();
@@ -156,34 +109,19 @@ export default function MenuPage() {
     fetchNutrition();
   }, [selectedItem]);
 
-  // Filter menu items by the selected category
-  const filteredMenuItems = selectedCategory 
+  const filteredMenuItems = selectedCategory
     ? menuItems.filter(item => item.item_type === selectedCategory)
     : [];
 
-  // Open the customization modal for the clicked item
-  const openCustomization = async (item: {
-    item_id: number;
-    item_name: string;
-    sell_price: number;
-    item_type: string;
-    ingredients?: { ingredient_id: number; name: string }[];
-    nutrition?: any;
-  }) => {
-    setIsLoadingIngredients(true);
-    setShowModal(false); // hide modal while loading
-  
+  const openCustomization = async (item: any) => {
     const fetchedIngredients = await GetIngredients(item.item_id);
-    setIngredients(fetchedIngredients);
-
     const fetchedNutrition = await GetNutrition(item.item_id);
-    setNutritionData(fetchedNutrition);
-  
+
     setSelectedItem({
       ...item,
       ingredients: fetchedIngredients
     });
-  
+
     setCustomization({
       ice: "Medium",
       sweetness: "Normal",
@@ -191,17 +129,13 @@ export default function MenuPage() {
       removedIngredients: [],
       toppings: []
     });
-  
-    setIsLoadingIngredients(false);
+
+    setNutritionData(fetchedNutrition);
     setShowModal(true);
   };
-  
-  
 
-  // Calculate the total cost using the sell_price of each item
   const total = cart.reduce((sum, item) => sum + (item.sell_price || 0), 0);
 
-  // Handle order checkout: show alert and clear cart
   const handleCheckout = () => {
     alert('Order placed!');
     clearCart();
@@ -209,118 +143,50 @@ export default function MenuPage() {
 
   if (isLoading) {
     return (
-      // centered loader while data is being fetched
       <div className="flex items-center justify-center h-screen">
         <span className="text-2xl font-bold">Loading Menu...</span>
-        <div className="flex items-center justify-center h-screen">
-          <Image
-            src="/mascotDancing.gif"
-            alt="mascot"
-            width={75}
-            height={100}
-          />
-        </div>
+        <Image src="/mascotDancing.gif" alt="mascot" width={75} height={100} />
       </div>
     );
   }
 
   return (
-      <div
-        className={`flex mx-4 mt-10 mb-10 space-x-4 pt-16 ${
-          highContrast ? 'bg-black text-yellow-300' : ''
-        }`}
-        style={{ fontSize: `${fontScale}rem` }}
-      >
-        <WeatherWidget />
-        + <div
-   className={`fixed bottom-2 right-2 flex flex-col items-end z-50
-     ${highContrast ? 'bg-black text-yellow-300' : ''}`}
- >
-          {/* Modal */}
-          <div
-   className={`relative mb-1 w-40 p-2 text-sm transition-all duration-300 ${
-       accessibilityModalOpen
-         ? 'opacity-100 scale-100 pointer-events-auto z-50'
-         : 'opacity-0 scale-90 pointer-events-none z-[-1]'
-     }`}
->
+    <div className={`flex mx-4 mt-10 mb-10 space-x-4 pt-16 ${highContrast ? 'bg-black text-yellow-300' : ''}`} style={{ fontSize: `${fontScale}rem` }}>
+      <WeatherWidget />
 
-            {/* Triangle Arrow */}
-            <div className="absolute bottom-0 right-6 translate-y-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
-
-            {/* Modal Content */}
-            <div className={`p-4 rounded shadow-lg text-center ${highContrast ? 'bg-black text-yellow-300' : 'bg-white '}`}>
-              <h3 className="font-bold text-lg mb-2">Accessibility Options</h3>
-
-              {/* Font Size Controls */}
-              <p className="text-sm mb-2">Font Size:</p>
-              <div className="flex items-center space-x-2 mb-5 justify-center">
-                <button
-                  onClick={() => setFontScale(prev => Math.max(0.75, prev - 0.1))}
-                  className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                >
-                  A-
-                </button>
-                <button
-                  onClick={() => setFontScale(1)}
-                  className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                >
-                  A
-                </button>
-                <button
-                  onClick={() => setFontScale(prev => Math.min(2, prev + 0.1))}
-                  className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                >
-                  A+
-                </button>
-              </div>
-
-              {/* High Contrast Toggle */}
-              <div className="mb-5">
-                <p className="text-sm mb-1">High Contrast:</p>
-                <button
-                  onClick={() => setHighContrast(prev => !prev)}
-                  className={`px-3 py-1 rounded font-semibold ${
-                    highContrast
-                      ? 'bg-yellow-300 text-black hover:bg-yellow-200'
-                      : 'bg-gray-200 text-black hover:bg-gray-300'
-                  }`}
-                >
-                  {highContrast ? 'Disable' : 'Enable'}
-                </button>
-              </div>
-
-              <p className="text-sm mb-2">Translate:</p>
-              <GoogleTranslate />
+      {/* Accessibility Button & Modal */}
+      <div className="fixed bottom-2 right-2 flex flex-col items-end z-50">
+        <div className={`relative mb-1 w-40 p-2 ${accessibilityModalOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}>
+          <div className="absolute bottom-0 right-6 translate-y-full border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
+          <div className={`p-4 rounded shadow-lg ${highContrast ? 'bg-black text-yellow-300' : 'bg-white'}`}>
+            <h3 className="font-bold text-lg mb-2">Accessibility Options</h3>
+            <p className="text-sm mb-2">Font Size:</p>
+            <div className="flex items-center space-x-2 mb-5 justify-center">
+              <button onClick={() => setFontScale(prev => Math.max(0.75, prev - 0.1))} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">A-</button>
+              <button onClick={() => setFontScale(1)} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">A</button>
+              <button onClick={() => setFontScale(prev => Math.min(2, prev + 0.1))} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">A+</button>
             </div>
+            <p className="text-sm mb-1">High Contrast:</p>
+            <button onClick={() => setHighContrast(prev => !prev)} className={`px-3 py-1 rounded font-semibold ${highContrast ? 'bg-yellow-300 text-black' : 'bg-gray-200 text-black'}`}>
+              {highContrast ? 'Disable' : 'Enable'}
+            </button>
+            <p className="text-sm mt-3 mb-2">Translate:</p>
+            <GoogleTranslate />
           </div>
-
-          {/* Button */}
-          <button
-   className="bg-accent text-white font-bold p-2 rounded-full border-accent
-              pointer-events-auto"
-    onClick={() => setAccessibilityModalOpen(!accessibilityModalOpen)}
-  >
-            <Accessibility size={32} />
-          </button>
         </div>
+        <button className="bg-accent text-white font-bold p-2 rounded-full" onClick={() => setAccessibilityModalOpen(!accessibilityModalOpen)}>
+          <Accessibility size={32} />
+        </button>
+      </div>
 
-
-
-      {/* Categories Column */}
+      {/* Category Buttons */}
       <div className="w-64 pr-4 border-r">
-        <div className="lex flex-col space-y-2">
+        <div className="flex flex-col space-y-2">
           {menuCategories.map((category) => (
-            <button 
-              key={category} 
+            <button
+              key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`w-full text-center p-2 rounded ${
-                selectedCategory === category 
-                  ? 'bg-accent font-bold text-white' 
-                  : 'bg-primary font-bold text-accent hover:bg-primary border border-primary border-2'
-                  
-              }
-              ${highContrast ? 'bg-black text-yellow-300' : ''}`}
+              className={`w-full p-2 rounded ${selectedCategory === category ? 'bg-accent font-bold text-white' : 'bg-primary text-accent border-2 border-primary'} ${highContrast ? 'bg-black text-yellow-300' : ''}`}
             >
               {category}
             </button>
@@ -328,36 +194,32 @@ export default function MenuPage() {
         </div>
       </div>
 
-      {/* Menu Items and Cart Column */}
+      {/* Menu Items */}
       <div className="flex-1 pl-4 mb-10">
-        {/* <h2 className="text-2xl text-accent font-bold ml-1 mb-4">{selectedCategory} Menu</h2> */}
         <div className="grid grid-cols-3 gap-4">
           {filteredMenuItems.length > 0 ? (
             filteredMenuItems.map((item) => (
-              <div 
-                key={item.item_id} 
-                className={`border z-10 border-3 border-primary p-4 rounded-lg shadow-md cursor-pointer ${
-                  highContrast ? 'bg-black text-yellow-300' : 'bg-white'
-                }`}
+              <div
+                key={item.item_id}
+                className={`border border-primary p-4 rounded-lg shadow-md cursor-pointer ${highContrast ? 'bg-black text-yellow-300' : 'bg-white'}`}
                 onClick={() => openCustomization(item)}
               >
-                {/* Display the image corresponding to the item_id */}
                 <div className="relative w-full aspect-square mb-2">
-                <img
-                  src={`/images/${item.item_id}.jpg`}
-                  alt={item.item_name}
-                  className="absolute border border-2 border-primary inset-0 w-full h-full object-cover rounded"
-                />
+                  <img
+                    src={`/images/${item.item_id}.jpg`}
+                    alt={item.item_name}
+                    className="absolute inset-0 w-full h-full object-cover rounded border border-primary"
+                  />
                 </div>
-
-                <h3 className={`font-bold ${
-                    highContrast ? 'bg-black text-yellow-300' : 'text-accent'
-                  }`}
-                  style={{ fontSize: `${fontScale}rem` }}
-                >
-                  {item.item_name}
-                </h3>
-                <p className="text-text">${item.sell_price.toFixed(2)}</p>
+                <h3 className={`font-bold ${highContrast ? 'text-yellow-300' : 'text-accent'}`}>{item.item_name}</h3>
+                <p className="text-text">
+                  ${isHappyHour && item.happy_hour_price !== null
+                    ? item.happy_hour_price.toFixed(2)
+                    : item.sell_price.toFixed(2)}
+                </p>
+                {isHappyHour && item.happy_hour_price !== null && (
+                  <p className="text-xs text-yellow-600 mt-1">Happy Hour Price!</p>
+                )}
               </div>
             ))
           ) : (
@@ -366,7 +228,6 @@ export default function MenuPage() {
         </div>
       </div>
 
-      {/* Customization Modal */}
       {showModal && selectedItem && (
         <CustomizationModal
           selectedItem={selectedItem}
@@ -382,7 +243,6 @@ export default function MenuPage() {
           highContrast={highContrast}
         />
       )}
-
     </div>
   );
 }

@@ -34,6 +34,11 @@ const managerOptions = [
     icon: <Monitor size={32} />,
     href: "/manager/menu_boards",
   },
+  {
+    title: "Set Happy Hour",
+    icon: <Utensils size={32} />, // You can switch this to a clock or discount icon
+    href: "/manager/set_happy_hour",
+  },
 ];
 
 export default function ManagerPage() {
