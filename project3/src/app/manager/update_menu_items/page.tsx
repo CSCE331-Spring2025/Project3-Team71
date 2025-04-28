@@ -2,6 +2,8 @@
 import Image from "next/image";
 import { useState, ChangeEvent, useEffect } from "react";
 
+//manage menu items page
+//used for managers to add, edit, and delete menu items
 interface MenuItem {
   item_id: number;
   name: string;

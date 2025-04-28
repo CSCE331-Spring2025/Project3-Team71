@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import pool from "@/lib/db";
 import { redirect } from "next/navigation";
 
+
 export default async function ManagerPageWrapper() {
   const session = await auth();
 

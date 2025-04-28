@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+//page to view orders
+//used for managers to view orders placed by customers
 interface Order {
   id: number;
   order_date: string; // or Date, depending on your schema

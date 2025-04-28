@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+//customization for the menu items
 interface CustomizationProps {
   selectedItem: {
     item_id: number;
