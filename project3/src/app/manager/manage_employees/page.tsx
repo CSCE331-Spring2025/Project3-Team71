@@ -195,9 +195,24 @@ export default function ManageEmployeesPage() {
             <div className="space-y-4">
               <input type="text" value={editingEmployee.name} onChange={(e) => setEditingEmployee({ ...editingEmployee, name: e.target.value })} className="w-full border rounded p-2" />
               <input type="number" value={editingEmployee.employee_wage ?? ""} onChange={(e) => setEditingEmployee({ ...editingEmployee, employee_wage: parseFloat(e.target.value) || 0 })} className="w-full border rounded p-2" />
-              <input type="email" value={editingEmployee.email} onChange={(e) => setEditingEmployee({ ...editingEmployee, email: e.target.value })} className="w-full border rounded p-2" />
-              <input type="text" value={editingEmployee.last_sign_in} onChange={(e) => setEditingEmployee({ ...editingEmployee, last_sign_in: e.target.value })} className="w-full border rounded p-2" />
-              <input type="text" value={editingEmployee.time_worked} onChange={(e) => setEditingEmployee({ ...editingEmployee, time_worked: e.target.value })} className="w-full border rounded p-2" />
+              <input
+                type="email"
+                value={editingEmployee.email ?? ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, email: e.target.value })}
+                className="w-full border rounded p-2"
+              />
+              <input
+                type="text"
+                value={editingEmployee.last_sign_in ?? ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, last_sign_in: e.target.value })}
+                className="w-full border rounded p-2"
+              />
+              <input
+                type="text"
+                value={editingEmployee.time_worked ?? ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, time_worked: e.target.value })}
+                className="w-full border rounded p-2"
+              />
             </div>
 
             <div className="flex justify-between mt-6">

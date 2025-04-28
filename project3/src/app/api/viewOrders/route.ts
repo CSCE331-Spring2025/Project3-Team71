@@ -20,10 +20,15 @@ export async function GET(req: Request) {
         o.order_id AS id,
         o.order_date,
         o.order_cost AS total,
-        -- Return items as an array of item_ids (not names)
-        o.items AS item_ids
+        (
+          SELECT ARRAY_AGG(mi.item_name ORDER BY mi.item_name)
+          FROM UNNEST(o.items) AS u(item_id)
+          LEFT JOIN menu_items mi ON mi.item_id = u.item_id
+          WHERE mi.item_name IS NOT NULL
+        ) AS items
       FROM orders o
-      WHERE o.order_date BETWEEN $1 AND $2
+      WHERE o.order_date >= $1
+        AND o.order_date < ($2::date + INTERVAL '1 day')
       ORDER BY o.order_date;
       `,
       [startDate, endDate]
@@ -33,9 +38,10 @@ export async function GET(req: Request) {
     const orders = result.rows.map((row: any) => ({
       id: row.id,
       order_date: row.order_date,
-      items: row.item_ids ? row.item_ids.map((itemId: number) => ({ item_id: itemId })) : [], // Change item names to item ids
+      items: row.items ?? [],
       total: row.total,
     }));
+    
 
     return NextResponse.json(orders);
   } catch (error) {
