@@ -5,8 +5,6 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 
-//view sales page for managers
-//used for managers to view sales data and generate reports
 interface IngredientUsage {
   ingredient: string;
   usage_count: number;

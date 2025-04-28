@@ -7,11 +7,11 @@ export async function POST(req: Request) {
     const query = `
         SELECT 'Total Sales' AS category, SUM(order_cost) AS total 
         FROM orders 
-        WHERE order_date >= CURRENT_DATE
+        WHERE order_date::date = CURRENT_DATE AND z_report = false
         UNION ALL
         SELECT 'Total Profit' AS category, SUM(order_profit) AS total 
         FROM orders 
-        WHERE order_date >= CURRENT_DATE;
+        WHERE order_date::date = CURRENT_DATE AND z_report = false;
     `;
 
     console.log('Executing query:', query);
@@ -30,15 +30,17 @@ export async function POST(req: Request) {
     console.log('Total Sales:', totalSales);
     console.log('Total Profits:', totalProfits);
 
-    // Query to delete orders for today after calculating totals
-    const deleteQuery = `
-        DELETE FROM orders
-        WHERE order_date >= CURRENT_DATE;
+    // Query toupdate orders for today and changing z repor to true
+    const updateQuery = `
+        UPDATE orders
+        SET z_report = true
+        WHERE order_date::date = CURRENT_DATE
+          AND z_report = false;
     `;
-    console.log('Executing delete query:', deleteQuery);
+    console.log('Executing delete query:', updateQuery);
 
-    // Run the delete query
-    await Pool.query(deleteQuery);
+    // Run the update query
+    await Pool.query(updateQuery);
 
     // Return the response with the totals
     return NextResponse.json({

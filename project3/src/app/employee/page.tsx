@@ -1,7 +1,5 @@
 "use client";
 
-//employee menu page
-//used for employees to place orders for customers
 import { useState, useEffect } from 'react';
 import { Loader } from 'lucide-react';
 import { useCart } from "@/components/CartContext";
