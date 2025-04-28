@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       ORDER BY end_datetime DESC
       LIMIT 1
     `);
-    const isHappyHour = hhRes.rowCount > 0;
+    const isHappyHour = (hhRes.rowCount ?? 0) > 0;
 
     let orderItemIds: number[] = [];
     let orderTotal = 0;
