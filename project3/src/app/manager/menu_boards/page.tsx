@@ -48,7 +48,7 @@ export default function MenuBoard() {
 
   // Function to pick 3 random unique items for the left container
   const leftImageFinder = () => {
-    let selectedItems = [];
+    let selectedItems: typeof filteredItems[number][] = [];
     while (selectedItems.length < 3) {
       const randomItem = filteredItems[Math.floor(Math.random() * filteredItems.length)];
       // Ensure unique item selection
@@ -61,7 +61,7 @@ export default function MenuBoard() {
 
   // Function to pick 3 random unique items for the right container
   const rightImageFinder = () => {
-    let selectedItems = [];
+    let selectedItems: typeof filteredItems[number][] = [];
     while (selectedItems.length < 3) {
       const randomItem = filteredItems[Math.floor(Math.random() * filteredItems.length)];
       // Ensure unique item selection

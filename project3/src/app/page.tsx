@@ -34,7 +34,13 @@ export default function MenuPage() {
     ingredients: { ingredient_id: number; name: string }[];
   } | null>(null);
 
-  const [customization, setCustomization] = useState({
+  const [customization, setCustomization] = useState<{
+    ice: string;
+    sweetness: string;
+    teaType: string;
+    removedIngredients: string[];
+    toppings: string[];
+  }>({
     ice: "Regular",
     sweetness: "Normal",
     teaType: "Green tea",
@@ -71,7 +77,7 @@ export default function MenuPage() {
         const data = await res.json();
         setMenuItems(data);
 
-        const categories = [...new Set(data.map((item: any) => item.item_type))];
+        const categories = [...new Set(data.map((item: any) => item.item_type))] as string[];
         setMenuCategories(categories);
         if (categories.length > 0) {
           setSelectedCategory(categories[0]);
