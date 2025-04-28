@@ -17,20 +17,22 @@ export async function GET(req: Request) {
     console.log(`Fetching sales report from ${startDate} to ${endDate}`);
 
     const query = `
-      SELECT item, SUM(order_cost) AS total_sales
+      SELECT mi.item_name AS item, SUM(expanded.order_cost) AS total_sales
       FROM (
-        SELECT unnest(items) AS item, order_cost
+        SELECT unnest(items)::integer AS item_id, order_cost
         FROM orders
-        WHERE order_date BETWEEN $1::date AND $2::date
+        WHERE order_date >= $1
+          AND order_date < ($2::date + INTERVAL '1 day')
       ) AS expanded
-      GROUP BY item
+      JOIN menu_items mi ON mi.item_id = expanded.item_id
+      GROUP BY mi.item_name
       ORDER BY total_sales DESC;
     `;
 
     const result = await Pool.query(query, [startDate, endDate]);
 
     const report = result.rows.map((row: any) => ({
-      item_id: row.item,
+      item: row.item, // now this is the item_name
       total_sales: parseFloat(row.total_sales)
     }));
 
