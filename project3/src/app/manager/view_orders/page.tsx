@@ -4,11 +4,11 @@ import { useState } from "react";
 
 interface Order {
   id: number;
-  order_date: string; // or Date, depending on your schema
-  items?: { item_id: number }[];
+  order_date: string;
+  items?: string[];
   total?: number;
-  // Add other fields as needed
 }
+
 
 export default function ViewOrdersPage() {
   const [startDate, setStartDate] = useState<string>("");
@@ -36,6 +36,7 @@ export default function ViewOrdersPage() {
 
       const data: Order[] = await response.json();
       setOrders(data);
+      console.log("Fetched orders:", data[0].items); // Debugging line
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -101,8 +102,8 @@ export default function ViewOrdersPage() {
                     {new Date(order.order_date).toLocaleDateString()}
                   </td>
                   <td className="py-2 px-4">
-                    {order.items
-                      ? order.items.map((item) => item.item_id).join(", ")
+                    {order.items?.length
+                      ? order.items.join(", ")
                       : "No items"}
                   </td>
                   <td className="py-2 px-4">{order.total?.toFixed(2) || "0.00"}</td>

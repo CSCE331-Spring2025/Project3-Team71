@@ -11,7 +11,7 @@ interface IngredientUsage {
 }
 
 interface SalesData {
-  item_id: number;
+  item: string;
   total_sales: number;
 }
 
@@ -274,7 +274,7 @@ export default function ViewSalesPage() {
           <tbody>
             {salesData.map((item, index) => (
               <tr key={index} className="border-b">
-                <td className="py-2 px-4">{item.item_id}</td>
+                <td className="py-2 px-4">{item.item}</td>
                 <td className="py-2 px-4">{item.total_sales.toFixed(2)}</td>
               </tr>
             ))}
