@@ -1,5 +1,8 @@
 "use client";
 
+//customer ordering page
+//used for customers to place orders for themselves
+//implements accessibility features such as font scaling and high contrast mode
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Accessibility, Loader } from 'lucide-react';
