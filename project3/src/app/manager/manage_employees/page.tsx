@@ -31,7 +31,6 @@ export default function ManageEmployeesPage() {
       const res = await fetch("/api/employees");
       const data = await res.json();
       setEmployees(data);
-
       const maxId = data.reduce((max: number, emp: Employee) => Math.max(max, emp.id), 0);
       setNewEmployee((prev) => ({ ...prev, employee_id: (maxId + 1).toString() }));
     } catch (err) {
@@ -44,11 +43,7 @@ export default function ManageEmployeesPage() {
   }, []);
 
   const handleAddEmployee = async () => {
-    if (
-      !newEmployee.name.trim() ||
-      !newEmployee.employee_wage.trim() ||
-      !newEmployee.email.trim()
-    ) {
+    if (!newEmployee.name.trim() || !newEmployee.employee_wage.trim() || !newEmployee.email.trim()) {
       alert("Name, wage, and email are required.");
       return;
     }
@@ -106,6 +101,7 @@ export default function ManageEmployeesPage() {
       });
 
       if (res.ok) {
+        setShowEditModal(false);
         fetchEmployees();
       }
     } catch (err) {
@@ -153,14 +149,13 @@ export default function ManageEmployeesPage() {
         ))}
       </div>
 
-      {/* Add Employee Modal */}
+      {/* Add Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-primary bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-lg relative">
             <h2 className="text-2xl font-bold mb-4">Add Employee</h2>
-
             <div className="space-y-4">
-              <input type="text" placeholder="Employee ID" value={newEmployee.employee_id} readOnly className="w-full border rounded p-2 bg-gray-100 text-gray-500" />
+              <input readOnly value={newEmployee.employee_id} placeholder="Employee ID" className="w-full border rounded p-2 bg-gray-100 text-gray-500" />
               <input type="text" placeholder="Name" value={newEmployee.name} onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })} className="w-full border rounded p-2" />
               <input type="number" placeholder="Wage" value={newEmployee.employee_wage} onChange={(e) => setNewEmployee({ ...newEmployee, employee_wage: e.target.value })} className="w-full border rounded p-2" />
               <input type="email" placeholder="Email" value={newEmployee.email} onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })} className="w-full border rounded p-2" />
@@ -169,15 +164,13 @@ export default function ManageEmployeesPage() {
             </div>
 
             <div className="flex justify-end mt-6 gap-2">
-              <button className="px-4 py-2 border rounded hover:bg-gray-100" onClick={() => setShowAddModal(false)}>Cancel</button>
+              <button onClick={() => setShowAddModal(false)} className="px-4 py-2 border rounded hover:bg-gray-100">Cancel</button>
               <button
                 disabled={!newEmployee.name.trim() || !newEmployee.employee_wage.trim() || !newEmployee.email.trim()}
                 onClick={handleAddEmployee}
-                className={`px-4 py-2 rounded text-white ${
-                  !newEmployee.name.trim() || !newEmployee.employee_wage.trim() || !newEmployee.email.trim()
-                    ? "bg-gray-300 cursor-not-allowed"
-                    : "bg-green-600 hover:bg-green-700"
-                }`}
+                className={`px-4 py-2 rounded text-white ${!newEmployee.name.trim() || !newEmployee.employee_wage.trim() || !newEmployee.email.trim()
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700"}`}
               >
                 Add
               </button>
@@ -186,30 +179,45 @@ export default function ManageEmployeesPage() {
         </div>
       )}
 
-      {/* Edit Employee Modal */}
+      {/* Edit Modal */}
       {showEditModal && editingEmployee && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-primary bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-lg relative">
             <h2 className="text-2xl font-bold mb-4">Edit Employee</h2>
 
             <div className="space-y-4">
-              <input type="text" value={editingEmployee.name} onChange={(e) => setEditingEmployee({ ...editingEmployee, name: e.target.value })} className="w-full border rounded p-2" />
-              <input type="number" value={editingEmployee.employee_wage ?? ""} onChange={(e) => setEditingEmployee({ ...editingEmployee, employee_wage: parseFloat(e.target.value) || 0 })} className="w-full border rounded p-2" />
+              <input
+                type="text"
+                placeholder="Name"
+                value={editingEmployee.name}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, name: e.target.value })}
+                className="w-full border rounded p-2"
+              />
+              <input
+                type="number"
+                placeholder="Wage"
+                value={editingEmployee.employee_wage ?? ""}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, employee_wage: parseFloat(e.target.value) || 0 })}
+                className="w-full border rounded p-2"
+              />
               <input
                 type="email"
-                value={editingEmployee.email ?? ''}
+                placeholder="Email"
+                value={editingEmployee.email ?? ""}
                 onChange={(e) => setEditingEmployee({ ...editingEmployee, email: e.target.value })}
                 className="w-full border rounded p-2"
               />
               <input
                 type="text"
-                value={editingEmployee.last_sign_in ?? ''}
+                placeholder="Last Sign-In (e.g., 2025-05-01 08:00)"
+                value={editingEmployee.last_sign_in ?? ""}
                 onChange={(e) => setEditingEmployee({ ...editingEmployee, last_sign_in: e.target.value })}
                 className="w-full border rounded p-2"
               />
               <input
                 type="text"
-                value={editingEmployee.time_worked ?? ''}
+                placeholder="Time Worked (e.g., 12h 30m)"
+                value={editingEmployee.time_worked ?? ""}
                 onChange={(e) => setEditingEmployee({ ...editingEmployee, time_worked: e.target.value })}
                 className="w-full border rounded p-2"
               />
@@ -217,17 +225,18 @@ export default function ManageEmployeesPage() {
 
             <div className="flex justify-between mt-6">
               <button
-                onClick={() => {
-                  handleDeleteEmployee(editingEmployee.id, editingEmployee.name);
-                  setShowEditModal(false);
-                }}
+                onClick={() => handleDeleteEmployee(editingEmployee.id, editingEmployee.name)}
                 className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
               >
                 Delete
               </button>
               <div className="flex gap-2">
-                <button onClick={() => setShowEditModal(false)} className="px-4 py-2 border rounded hover:bg-gray-100">Cancel</button>
-                <button onClick={handleUpdateEmployee} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
+                <button onClick={() => setShowEditModal(false)} className="px-4 py-2 border rounded hover:bg-gray-100">
+                  Cancel
+                </button>
+                <button onClick={handleUpdateEmployee} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                  Save
+                </button>
               </div>
             </div>
           </div>

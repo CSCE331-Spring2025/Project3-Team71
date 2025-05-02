@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import Pool from "@/lib/db";
 
+// ─────────────────────────────────────────
+// GET: Fetch all employees
+// ─────────────────────────────────────────
 export async function GET() {
   try {
     const result = await Pool.query(`
@@ -15,6 +18,9 @@ export async function GET() {
   }
 }
 
+// ─────────────────────────────────────────
+// POST: Add a new employee
+// ─────────────────────────────────────────
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -33,6 +39,9 @@ export async function POST(req: Request) {
   }
 }
 
+// ─────────────────────────────────────────
+// PUT: Update an existing employee
+// ─────────────────────────────────────────
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
@@ -56,6 +65,9 @@ export async function PUT(req: Request) {
   }
 }
 
+// ─────────────────────────────────────────
+// DELETE: Delete an employee by ?id=
+// ─────────────────────────────────────────
 export async function DELETE(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
