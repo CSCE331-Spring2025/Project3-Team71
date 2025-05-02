@@ -18,6 +18,7 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [note, setNote] = useState("");
+  const [customerName, setCustomerName] = useState(""); // Add state for customer name
   const [showCelebration, setShowCelebration] = useState(false);
 
 
@@ -227,6 +228,7 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
                 onClick={() => {
                   setCheckoutModalOpen(false);
                   setNote("");
+                  setCustomerName(""); // Reset customer name when closing
                 }}
                 className="absolute top-2 right-3 text-gray-500 hover:text-black text-xl"
               >
@@ -297,6 +299,21 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
                 ))}
               </ul>
 
+              {/* Add customer name field */}
+              <div className="mb-4">
+                <label htmlFor="customerName" className="block text-sm font-medium text-gray-700 mb-1">
+                  Your Name
+                </label>
+                <input
+                  id="customerName"
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
+                  placeholder="Enter your name"
+                />
+              </div>
+
               <div className="mb-4">
                 <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-1">
                   Add a note (optional)
@@ -330,6 +347,7 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
                         quantity: item.quantity,
                       })),
                       note: note.trim(),
+                      customer_name: customerName.trim() // Add customer name to the request
                     }),
                   });
                 
@@ -345,6 +363,7 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
                     // alert("Order placed!");
                     clearCart();
                     setNote("");
+                    setCustomerName(""); // Reset customer name after success
                     setCheckoutModalOpen(false);
                   } else {
                     alert("Checkout failed: " + data.error);
@@ -365,6 +384,7 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
               setCheckoutModalOpen(false);
               setCartModalOpen(true);
               setNote("");
+              setCustomerName(""); // Reset customer name when returning to cart
             }}
             className="w-full border border-blue-500 text-blue-500 py-2 rounded hover:bg-blue-50"
           >

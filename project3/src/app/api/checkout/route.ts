@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
 export async function POST(req: NextRequest) {
-  const { items, note } = await req.json(); // [{ menuItemId, quantity }]
+  const { items, note, customer_name } = await req.json(); // [{ menuItemId, quantity }] * added customer_name
   const client = await pool.connect();
 
   try {
@@ -47,11 +47,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Insert the order into the orders table, including the order_profit
+    // Insert the order into the orders table, including the customer_name
     await client.query(
-      `INSERT INTO orders (items, order_cost, order_profit, note, order_date)
-       VALUES ($1, $2, $3, $4, NOW())`,
-      [orderItemIds, orderTotal, orderProfit, note || null]
+      `INSERT INTO orders (items, order_cost, order_profit, note, order_date, customer_name)
+       VALUES ($1, $2, $3, $4, NOW(), $5)`,
+      [orderItemIds, orderTotal, orderProfit, note || null, customer_name || 'Walk-in']
     );
 
     await client.query('COMMIT');
