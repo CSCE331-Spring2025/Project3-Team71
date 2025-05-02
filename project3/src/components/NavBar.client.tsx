@@ -302,7 +302,7 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
               {/* Add customer name field */}
               <div className="mb-4">
                 <label htmlFor="customerName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Your Name
+                  Customer Name
                 </label>
                 <input
                   id="customerName"
@@ -310,7 +310,7 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
-                  placeholder="Enter your name"
+                  placeholder="Enter name"
                 />
               </div>
 
@@ -347,7 +347,8 @@ const NavBarClient = ({ session, isManager }: NavBarClientProps) => {
                         quantity: item.quantity,
                       })),
                       note: note.trim(),
-                      customer_name: customerName.trim() // Add customer name to the request
+                      customer_name: customerName.trim(),
+                      employee_id: session?.user?.name|| null // use email to send name as employee ID
                     }),
                   });
                 

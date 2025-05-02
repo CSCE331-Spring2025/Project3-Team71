@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
 export async function POST(req: NextRequest) {
-  const { items, note, customer_name } = await req.json(); // [{ menuItemId, quantity }] * added customer_name
+  const { items, note, customer_name, employee_id } = await req.json(); // [{ menuItemId, quantity }] , npote, customer_name, employee_id
   const client = await pool.connect();
 
   try {
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     let orderProfit = 0;
 
     for (const { menuItemId, quantity } of items) {
+      // Existing code for order processing...
       const itemRes = await client.query(
         `SELECT sell_price, buy_price, happy_hour_price, ingredients 
          FROM menu_items WHERE item_id = $1`,
@@ -47,11 +48,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Insert the order into the orders table, including the customer_name
+    // Update query to include employee_id column
     await client.query(
-      `INSERT INTO orders (items, order_cost, order_profit, note, order_date, customer_name)
-       VALUES ($1, $2, $3, $4, NOW(), $5)`,
-      [orderItemIds, orderTotal, orderProfit, note || null, customer_name || 'Walk-in']
+      `INSERT INTO orders (items, order_cost, order_profit, note, order_date, customer_name, employee_id)
+       VALUES ($1, $2, $3, $4, NOW(), $5, $6)`,
+      [orderItemIds, orderTotal, orderProfit, note || null, customer_name || 'Walk-in', employee_id || null]
     );
 
     await client.query('COMMIT');
